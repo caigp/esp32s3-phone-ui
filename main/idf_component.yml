@@ -1,0 +1,16 @@
+dependencies:
+  idf:
+    version: '>=4.1.0'
+
+  atanisoft/esp_lcd_touch_xpt2046: ^1.0.6
+  lvgl/lvgl: ^9.2.0
+  espressif/esp_player: ^1.0.6
+  espressif/esp_codec_dev: ^1.6.2
+  espressif/esp_audio_render: ^1.0.0~2
+  espressif/gmf_audio: ^1.0.1~1
+  espressif/gmf_core: ^1.0.1
+  espressif/gmf_io: ^1.0.1~1
+  espressif/media_lib_sal: ^1.0.2
+
+  espressif/button: ^4.2.1
+  embedblocks/time-service: ^1.0.3
