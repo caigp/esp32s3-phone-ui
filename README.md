@@ -81,4 +81,4 @@ https://www.bilibili.com/video/BV1DmYN6HEnQ/
 
 ## 许可证
 
-本项目采用 [MIT License](LICENSE) 开源协议。
+本项目采用 **非商业性使用** 许可协议。仅供个人学习、研究和交流使用，严禁用于任何商业用途。详情请参阅 [LICENSE](LICENSE) 文件。
