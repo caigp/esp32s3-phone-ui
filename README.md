@@ -23,11 +23,62 @@ https://www.bilibili.com/video/BV1DmYN6HEnQ/
 
 更多功能正在开发和更新中，敬请期待！
 
-## 硬件要求
+## 硬件连接说明
 
-*   ESP32-S3 开发板
-*   TFT LCD 显示屏 (具体型号请参考代码或原理图)
-*   其他外设 (如扬声器、SD卡模块等，根据具体功能需求)
+本项目使用以下外设模块，请按照下表连接引脚：
+
+### 1. 显示屏与触摸
+*   **屏幕驱动**: ILI9341 (SPI 接口)
+*   **触摸驱动**: XPT2046 (SPI 接口)
+
+| 功能 | ESP32-S3 GPIO | 备注 |
+| :--- | :---: | :--- |
+| LCD SCLK | GPIO 40 | SPI 时钟 |
+| LCD MOSI | GPIO 41 | SPI 数据输出 |
+| LCD MISO | GPIO 38 | SPI 数据输入 |
+| LCD CS | GPIO 1 | 片选 |
+| LCD DC | GPIO 42 | 数据/命令选择 |
+| LCD RST | GPIO 2 | 复位 |
+| LCD BL | GPIO 39 | 背光控制 |
+| Touch CS | GPIO 47 | 触摸片选 |
+| Touch IRQ | NC | 未连接 |
+
+### 2. 音频输出
+*   **功放模块**: MAX98357 (I2S 接口)
+
+| 功能 | ESP32-S3 GPIO | 备注 |
+| :--- | :---: | :--- |
+| BCLK | GPIO 21 | 位时钟 |
+| WS (LRC) | GPIO 14 | 字选择/左右声道 |
+| DIN | GPIO 10 | 数据输入 |
+
+### 3. TF 卡模块 (SD Card)
+*   **接口**: SPI
+
+| 功能 | ESP32-S3 GPIO | 备注 |
+| :--- | :---: | :--- |
+| SCK | GPIO 5 | 时钟 |
+| MISO | GPIO 4 | 主入从出 |
+| MOSI | GPIO 6 | 主出从入 |
+| CS | GPIO 7 | 片选 |
+
+### 4. NES 游戏按键
+NES 模拟器的按键映射逻辑如下：
+*   **电平逻辑**：`1` 代表抬起（未按下），`0` 代表按下。
+*   **按键对应关系**：
+
+| NES 按键 | ESP32-S3 GPIO | 备注 |
+| :--- | :---: | :--- |
+| A | GPIO 9 | Bit 0 |
+| B | GPIO 8 | Bit 1 |
+| SELECT | GPIO 46 | Bit 2 |
+| START | GPIO 3 | Bit 3 |
+| UP | GPIO 17 | Bit 4 |
+| DOWN | GPIO 16 | Bit 5 |
+| LEFT | GPIO 15 | Bit 6 |
+| RIGHT | GPIO 18 | Bit 7 |
+
+*(注：按键状态通过 `key_board` 变量的位操作进行更新，具体逻辑参考 `video_audio.c`)*
 
 ## 环境搭建
 
