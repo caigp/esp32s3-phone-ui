@@ -9,7 +9,7 @@
 extern EventGroupHandle_t xWifiEventGroup;
 extern EventGroupHandle_t xWifiStatGroup;
 
-extern bool isconnected;
+extern bool wifi_isconnected;
 
 extern void wifi_scan(wifi_ap_record_t *ap_info, uint16_t *number);
 extern void wifi_init_sta();

@@ -18,7 +18,7 @@ static const char *TAG = "wifi";
 EventGroupHandle_t xWifiEventGroup;
 EventGroupHandle_t xWifiStatGroup;
 
-bool isconnected = false;
+bool wifi_isconnected = false;
 
 TaskHandle_t wifi_scan_task = NULL;
 
@@ -248,7 +248,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
             break;
         }
 
-        isconnected = false;
+        wifi_isconnected = false;
         lv_timer_set_repeat_count(lv_timer_create(hide_statusbar_wifi, 0, NULL), 1);
         // ESP_LOGI(TAG,"connect to the AP fail");
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
@@ -259,7 +259,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         xEventGroupSetBits(xWifiEventGroup, WIFI_CONNECTED_BIT);
             
         time_sync();
-        isconnected = true;
+        wifi_isconnected = true;
         lv_timer_set_repeat_count(lv_timer_create(show_statusbar_wifi, 0, NULL), 1);
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_SCAN_DONE) {
         

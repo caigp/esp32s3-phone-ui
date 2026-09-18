@@ -283,6 +283,10 @@ void init_status_bar()
     lv_obj_add_flag(ui_statusbar_wifi, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_CLICKABLE);     /// Flags
     lv_obj_remove_flag(ui_statusbar_wifi, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_image_set_inner_align(ui_statusbar_wifi, LV_IMAGE_ALIGN_STRETCH); 
+    if (wifi_isconnected)
+    {
+        lv_obj_clear_flag(ui_statusbar_wifi, LV_OBJ_FLAG_HIDDEN);
+    }
 }
 
 void ui_event_navigation_bar(lv_event_t * e)

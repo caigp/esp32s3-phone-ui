@@ -129,7 +129,7 @@ void ui_launcher_screen_init(void)
     ui_launcher = lv_obj_create(NULL);
     lv_obj_remove_flag(ui_launcher, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_SCROLLABLE |
                        LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM);     /// Flags
-    lv_obj_set_scroll_snap_x(ui_launcher, LV_SCROLL_SNAP_CENTER);
+    lv_obj_set_scrollbar_mode(ui_launcher, LV_SCROLLBAR_MODE_OFF);
 
     ui_Image1 = lv_image_create(ui_launcher);
     lv_image_set_src(ui_Image1, &ui_img_launcher_background_png);
@@ -147,21 +147,22 @@ void ui_launcher_screen_init(void)
     lv_obj_set_y(ui_Container26, lv_pct(10));
     lv_obj_set_flex_flow(ui_Container26, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(ui_Container26, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-    lv_obj_remove_flag(ui_Container26, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
-                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+    lv_obj_add_flag(ui_Container26, LV_OBJ_FLAG_SCROLL_ONE);     /// Flags
+    lv_obj_remove_flag(ui_Container26, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE |
+                       LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
     lv_obj_set_scrollbar_mode(ui_Container26, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_scroll_snap_x(ui_Container26, LV_SCROLL_SNAP_START);
+    lv_obj_set_scroll_snap_x(ui_Container26, LV_SCROLL_SNAP_CENTER);
 
     ui_page1 = lv_obj_create(ui_Container26);
     lv_obj_remove_style_all(ui_page1);
     lv_obj_set_width(ui_page1, lv_pct(100));
     lv_obj_set_height(ui_page1, lv_pct(100));
     lv_obj_set_flex_flow(ui_page1, LV_FLEX_FLOW_ROW_WRAP);
-    lv_obj_set_flex_align(ui_page1, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
+    lv_obj_set_flex_align(ui_page1, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_remove_flag(ui_page1, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
                        LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                        LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
-    lv_obj_set_scrollbar_mode(ui_page1, LV_SCROLLBAR_MODE_ON);
+    lv_obj_set_scrollbar_mode(ui_page1, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_pad_row(ui_page1, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_column(ui_page1, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -346,12 +347,12 @@ void ui_launcher_screen_init(void)
     lv_obj_set_height(ui_page2, lv_pct(100));
     lv_obj_set_y(ui_page2, 0);
     lv_obj_set_x(ui_page2, lv_pct(100));
-    lv_obj_set_align(ui_page2, LV_ALIGN_CENTER);
     lv_obj_set_flex_flow(ui_page2, LV_FLEX_FLOW_ROW_WRAP);
     lv_obj_set_flex_align(ui_page2, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_remove_flag(ui_page2, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
                        LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                        LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+    lv_obj_set_scrollbar_mode(ui_page2, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_pad_row(ui_page2, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_column(ui_page2, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -421,12 +422,12 @@ void ui_launcher_screen_init(void)
     lv_obj_set_height(ui_page3, lv_pct(100));
     lv_obj_set_y(ui_page3, 0);
     lv_obj_set_x(ui_page3, lv_pct(200));
-    lv_obj_set_align(ui_page3, LV_ALIGN_CENTER);
     lv_obj_set_flex_flow(ui_page3, LV_FLEX_FLOW_ROW_WRAP);
     lv_obj_set_flex_align(ui_page3, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_remove_flag(ui_page3, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_CLICK_FOCUSABLE |
                        LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
                        LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+    lv_obj_set_scrollbar_mode(ui_page3, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_style_pad_row(ui_page3, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_column(ui_page3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
