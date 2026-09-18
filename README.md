@@ -5,7 +5,7 @@
 ## 项目演示
 
 您可以在 Bilibili 上观看项目的演示视频：
-https://www.bilibili.com/video/BV1DmYN6HEnQ/
+https://www.bilibili.com/video/BV1utey6aE6M/?share_source=copy_web&vd_source=c5b28031d15a1478a256a684112e9e98
 
 ## 截图展示
 
@@ -18,6 +18,7 @@ https://www.bilibili.com/video/BV1DmYN6HEnQ/
 *   **MP3 播放器**：支持音频文件的播放与控制。
 *   **NES 游戏机模拟器**：可以运行经典的 NES (任天堂娱乐系统) 游戏。
 *   **中文日历**：显示日期、时间，并支持中文界面。
+*   **WiFi STA 模式**：支持连接到无线局域网，实现网络通信功能。
 
 ## 未来计划
 
@@ -27,9 +28,15 @@ https://www.bilibili.com/video/BV1DmYN6HEnQ/
 
 本项目使用以下外设模块，请按照下表连接引脚：
 
+### 屏幕模块展示
+
+![屏幕模块](Screenshot/tb_image_share_1789697037630.png)
+
 ### 1. 显示屏与触摸
 *   **屏幕驱动**: ILI9341 (SPI 接口)
-*   **触摸驱动**: XPT2046 (SPI 接口)
+*   **触摸驱动**: FT6336G (I2C 接口)
+
+#### 显示屏引脚连接
 
 | 功能 | ESP32-S3 GPIO | 备注 |
 | :--- | :---: | :--- |
@@ -40,10 +47,21 @@ https://www.bilibili.com/video/BV1DmYN6HEnQ/
 | LCD DC | GPIO 42 | 数据/命令选择 |
 | LCD RST | GPIO 2 | 复位 |
 | LCD BL | GPIO 39 | 背光控制 |
-| Touch CS | GPIO 47 | 触摸片选 |
-| Touch IRQ | NC | 未连接 |
+
+#### 触摸屏引脚连接
+
+| 功能 | ESP32-S3 GPIO | 备注 |
+| :--- | :---: | :--- |
+| I2C SCL | GPIO 21 | I2C 时钟线 |
+| I2C SDA | GPIO 47 | I2C 数据线 |
+| Touch RST | GPIO 11 | 触摸复位 |
 
 ### 2. 音频输出
+
+#### 音频模块展示
+
+![音频模块](Screenshot/tb_image_share_1789698535189.png)
+
 *   **功放模块**: MAX98357 (I2S 接口)
 
 | 功能 | ESP32-S3 GPIO | 备注 |
