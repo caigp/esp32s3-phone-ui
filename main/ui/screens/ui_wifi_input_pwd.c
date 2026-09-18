@@ -6,6 +6,8 @@
 #include "../ui.h"
 
 lv_obj_t * ui_wifi_input_pwd = NULL;
+lv_obj_t * ui_Container84 = NULL;
+lv_obj_t * ui_Container85 = NULL;
 lv_obj_t * ui_Container58 = NULL;
 lv_obj_t * ui_wifi_pwd_TextArea = NULL;
 lv_obj_t * ui_Checkbox1 = NULL;
@@ -48,8 +50,26 @@ void ui_wifi_input_pwd_screen_init(void)
 {
     ui_wifi_input_pwd = lv_obj_create(NULL);
     lv_obj_remove_flag(ui_wifi_input_pwd, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_flex_flow(ui_wifi_input_pwd, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(ui_wifi_input_pwd, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 
-    ui_Container58 = lv_obj_create(ui_wifi_input_pwd);
+    ui_Container84 = lv_obj_create(ui_wifi_input_pwd);
+    lv_obj_remove_style_all(ui_Container84);
+    lv_obj_set_height(ui_Container84, 25);
+    lv_obj_set_width(ui_Container84, lv_pct(100));
+    lv_obj_set_align(ui_Container84, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_Container84, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_Container84, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Container84, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Container85 = lv_obj_create(ui_wifi_input_pwd);
+    lv_obj_remove_style_all(ui_Container85);
+    lv_obj_set_width(ui_Container85, lv_pct(100));
+    lv_obj_set_flex_grow(ui_Container85, 1);
+    lv_obj_set_align(ui_Container85, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_Container85, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_Container58 = lv_obj_create(ui_Container85);
     lv_obj_remove_style_all(ui_Container58);
     lv_obj_set_width(ui_Container58, lv_pct(100));
     lv_obj_set_height(ui_Container58, lv_pct(100));
@@ -96,7 +116,7 @@ void ui_wifi_input_pwd_screen_init(void)
     lv_obj_set_style_bg_color(ui_Checkbox1, lv_color_hex(0xFF0000), LV_PART_INDICATOR | LV_STATE_CHECKED);
     lv_obj_set_style_bg_opa(ui_Checkbox1, 255, LV_PART_INDICATOR | LV_STATE_CHECKED);
 
-    ui_Keyboard1 = lv_keyboard_create(ui_wifi_input_pwd);
+    ui_Keyboard1 = lv_keyboard_create(ui_Container85);
     lv_keyboard_set_mode(ui_Keyboard1, LV_KEYBOARD_MODE_SPECIAL);
     lv_obj_set_height(ui_Keyboard1, 140);
     lv_obj_set_width(ui_Keyboard1, lv_pct(100));
@@ -130,6 +150,8 @@ void ui_wifi_input_pwd_screen_destroy(void)
 
     // NULL screen variables
     ui_wifi_input_pwd = NULL;
+    ui_Container84 = NULL;
+    ui_Container85 = NULL;
     ui_Container58 = NULL;
     ui_wifi_pwd_TextArea = NULL;
     ui_Checkbox1 = NULL;

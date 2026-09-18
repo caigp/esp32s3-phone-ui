@@ -6,11 +6,12 @@
 #include "../ui.h"
 
 lv_obj_t * ui_nes_game = NULL;
-lv_obj_t * ui_Container51 = NULL;
+lv_obj_t * ui_Container78 = NULL;
 lv_obj_t * ui_Container48 = NULL;
-lv_obj_t * ui_Label37 = NULL;
-lv_obj_t * ui_game_refresh = NULL;
-lv_obj_t * ui_Container49 = NULL;
+lv_obj_t * ui_Container32 = NULL;
+lv_obj_t * ui_Label33 = NULL;
+lv_obj_t * ui_game_refresh2 = NULL;
+lv_obj_t * ui_game_list = NULL;
 lv_obj_t * ui_simpleitem3 = NULL;
 lv_obj_t * ui_Image16 = NULL;
 lv_obj_t * ui_simple_item_text3 = NULL;
@@ -19,16 +20,12 @@ void ui_event_nes_game(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
-    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_RIGHT) {
-        lv_indev_wait_release(lv_indev_active());
-        _ui_screen_change(&ui_launcher, LV_SCR_LOAD_ANIM_OUT_RIGHT, 300, 0, &ui_launcher_screen_init);
-    }
     if(event_code == LV_EVENT_SCREEN_LOADED) {
         game_loaded(e);
     }
 }
 
-void ui_event_game_refresh(lv_event_t * e)
+void ui_event_game_refresh2(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -43,63 +40,74 @@ void ui_nes_game_screen_init(void)
 {
     ui_nes_game = lv_obj_create(NULL);
     lv_obj_remove_flag(ui_nes_game, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_flex_flow(ui_nes_game, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(ui_nes_game, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_bg_color(ui_nes_game, lv_color_hex(0xEEEEEE), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_nes_game, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Container51 = lv_obj_create(ui_nes_game);
-    lv_obj_remove_style_all(ui_Container51);
-    lv_obj_set_width(ui_Container51, lv_pct(100));
-    lv_obj_set_height(ui_Container51, lv_pct(100));
-    lv_obj_set_align(ui_Container51, LV_ALIGN_CENTER);
-    lv_obj_remove_flag(ui_Container51, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_Container78 = lv_obj_create(ui_nes_game);
+    lv_obj_remove_style_all(ui_Container78);
+    lv_obj_set_height(ui_Container78, 25);
+    lv_obj_set_width(ui_Container78, lv_pct(100));
+    lv_obj_set_align(ui_Container78, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_Container78, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_Container78, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Container78, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Container48 = lv_obj_create(ui_Container51);
+    ui_Container48 = lv_obj_create(ui_nes_game);
     lv_obj_remove_style_all(ui_Container48);
     lv_obj_set_width(ui_Container48, lv_pct(100));
-    lv_obj_set_height(ui_Container48, lv_pct(15));
-    lv_obj_set_flex_flow(ui_Container48, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(ui_Container48, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_flex_grow(ui_Container48, 1);
+    lv_obj_set_align(ui_Container48, LV_ALIGN_CENTER);
     lv_obj_remove_flag(ui_Container48, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_bg_color(ui_Container48, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_Container48, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Label37 = lv_label_create(ui_Container48);
-    lv_obj_set_width(ui_Label37, lv_pct(40));
-    lv_obj_set_height(ui_Label37, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_Label37, LV_ALIGN_LEFT_MID);
-    lv_label_set_text(ui_Label37, "游戏列表");
-    lv_obj_set_style_text_color(ui_Label37, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_Label37, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_Label37, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label37, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_Container32 = lv_obj_create(ui_Container48);
+    lv_obj_remove_style_all(ui_Container32);
+    lv_obj_set_width(ui_Container32, lv_pct(100));
+    lv_obj_set_height(ui_Container32, lv_pct(15));
+    lv_obj_set_flex_flow(ui_Container32, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(ui_Container32, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_Container32, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_Container32, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Container32, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_game_refresh = lv_image_create(ui_Container48);
-    lv_image_set_src(ui_game_refresh, &ui_img_icon_refresh_png);
-    lv_obj_set_width(ui_game_refresh, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_game_refresh, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_game_refresh, LV_ALIGN_CENTER);
-    lv_obj_set_ext_click_area(ui_game_refresh, 5);
-    lv_obj_add_flag(ui_game_refresh, LV_OBJ_FLAG_CLICKABLE);     /// Flags
-    lv_obj_remove_flag(ui_game_refresh, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
-                       LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM |
-                       LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
-    lv_obj_set_style_radius(ui_game_refresh, 5, LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_set_style_bg_color(ui_game_refresh, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_set_style_bg_opa(ui_game_refresh, 128, LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_set_style_pad_left(ui_game_refresh, 1, LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_set_style_pad_right(ui_game_refresh, 1, LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_set_style_pad_top(ui_game_refresh, 1, LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_set_style_pad_bottom(ui_game_refresh, 1, LV_PART_MAIN | LV_STATE_PRESSED);
+    ui_Label33 = lv_label_create(ui_Container32);
+    lv_obj_set_width(ui_Label33, lv_pct(40));
+    lv_obj_set_height(ui_Label33, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_Label33, LV_ALIGN_LEFT_MID);
+    lv_label_set_text(ui_Label33, "游戏列表");
+    lv_obj_set_style_text_color(ui_Label33, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Label33, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_align(ui_Label33, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label33, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Container49 = lv_obj_create(ui_Container51);
-    lv_obj_remove_style_all(ui_Container49);
-    lv_obj_set_width(ui_Container49, lv_pct(100));
-    lv_obj_set_height(ui_Container49, lv_pct(85));
-    lv_obj_set_x(ui_Container49, lv_pct(0));
-    lv_obj_set_y(ui_Container49, lv_pct(15));
-    lv_obj_remove_flag(ui_Container49, LV_OBJ_FLAG_CLICKABLE);      /// Flags
+    ui_game_refresh2 = lv_image_create(ui_Container32);
+    lv_image_set_src(ui_game_refresh2, &ui_img_icon_refresh_png);
+    lv_obj_set_width(ui_game_refresh2, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_game_refresh2, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_align(ui_game_refresh2, LV_ALIGN_CENTER);
+    lv_obj_set_ext_click_area(ui_game_refresh2, 5);
+    lv_obj_add_flag(ui_game_refresh2, LV_OBJ_FLAG_CLICKABLE);     /// Flags
+    lv_obj_remove_flag(ui_game_refresh2,
+                       LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE | LV_OBJ_FLAG_SCROLLABLE |
+                       LV_OBJ_FLAG_SCROLL_ELASTIC | LV_OBJ_FLAG_SCROLL_MOMENTUM | LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
+    lv_obj_set_style_radius(ui_game_refresh2, 5, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_color(ui_game_refresh2, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(ui_game_refresh2, 128, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_pad_left(ui_game_refresh2, 1, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_pad_right(ui_game_refresh2, 1, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_pad_top(ui_game_refresh2, 1, LV_PART_MAIN | LV_STATE_PRESSED);
+    lv_obj_set_style_pad_bottom(ui_game_refresh2, 1, LV_PART_MAIN | LV_STATE_PRESSED);
 
-    ui_simpleitem3 = lv_obj_create(ui_Container49);
+    ui_game_list = lv_obj_create(ui_Container48);
+    lv_obj_remove_style_all(ui_game_list);
+    lv_obj_set_width(ui_game_list, lv_pct(100));
+    lv_obj_set_height(ui_game_list, lv_pct(85));
+    lv_obj_set_x(ui_game_list, lv_pct(0));
+    lv_obj_set_y(ui_game_list, lv_pct(15));
+    lv_obj_remove_flag(ui_game_list, LV_OBJ_FLAG_CLICKABLE);      /// Flags
+
+    ui_simpleitem3 = lv_obj_create(ui_game_list);
     lv_obj_remove_style_all(ui_simpleitem3);
     lv_obj_set_height(ui_simpleitem3, 50);
     lv_obj_set_width(ui_simpleitem3, lv_pct(95));
@@ -138,7 +146,7 @@ void ui_nes_game_screen_init(void)
     lv_obj_set_style_pad_top(ui_simple_item_text3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_bottom(ui_simple_item_text3, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    lv_obj_add_event_cb(ui_game_refresh, ui_event_game_refresh, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_game_refresh2, ui_event_game_refresh2, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_nes_game, ui_event_nes_game, LV_EVENT_ALL, NULL);
 
 }
@@ -149,11 +157,12 @@ void ui_nes_game_screen_destroy(void)
 
     // NULL screen variables
     ui_nes_game = NULL;
-    ui_Container51 = NULL;
+    ui_Container78 = NULL;
     ui_Container48 = NULL;
-    ui_Label37 = NULL;
-    ui_game_refresh = NULL;
-    ui_Container49 = NULL;
+    ui_Container32 = NULL;
+    ui_Label33 = NULL;
+    ui_game_refresh2 = NULL;
+    ui_game_list = NULL;
     ui_simpleitem3 = NULL;
     ui_Image16 = NULL;
     ui_simple_item_text3 = NULL;

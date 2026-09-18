@@ -11,7 +11,7 @@ file(GLOB_RECURSE NOFRENDO_SRCS
 idf_component_register(
     SRCS ${NOFRENDO_SRCS}
     INCLUDE_DIRS "." "cpu" "libsnss" "nes" "sndhrdw" "mappers"
-    PRIV_REQUIRES nofrendo-esp32
+    PRIV_REQUIRES nofrendo-esp32 esp_timer
 )
 
 target_compile_options(${COMPONENT_LIB} PRIVATE

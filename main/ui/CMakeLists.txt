@@ -15,6 +15,7 @@ SET(SOURCES components/ui_comp_simpleitem.c
     screens/ui_wifi.c
     screens/ui_wifi_input_pwd.c
     screens/ui_calendar.c
+    screens/ui_notification_panel.c
     ui_theme_manager.c
     ui_themes.c
     ui.c
@@ -32,11 +33,10 @@ SET(SOURCES components/ui_comp_simpleitem.c
     images/ui_img_app_calc_png.c
     images/ui_img_app_calendar_png.c
     images/ui_img_app_music_png.c
-    images/ui_img_icon_wifi_small_png.c
     images/ui_img_icon_volume_png.c
     images/ui_img_temp_rh_bg_png.c
-    images/ui_img_icon_heart_rate_png.c
     images/ui_img_icon_spo2_png.c
+    images/ui_img_icon_heart_rate_png.c
     images/ui_img_music_changpian_png.c
     images/ui_img_1330499080.c
     images/ui_img_play_png.c
@@ -48,8 +48,9 @@ SET(SOURCES components/ui_comp_simpleitem.c
     images/ui_img_icon_wifi_png.c
     images/ui_img_icon_chevron_right_png.c
     images/ui_img_icon_wifi_black_png.c
-    images/ui_img_icon_lock_png.c
     images/ui_img_icon_circle_check_png.c
+    images/ui_img_icon_lock_png.c
+    images/ui_img_icon_wifi_small_png.c
     fonts/ui_font_simhei14.c)
 
 add_library(ui ${SOURCES})

@@ -1,28 +1,4 @@
 dependencies:
-  atanisoft/esp_lcd_touch_xpt2046:
-    component_hash: 7e6381b67b6e487379118368b8e91624dc87036ef5734818de1db9eb35697998
-    dependencies:
-    - name: espressif/esp_lcd_touch
-      registry_url: https://components.espressif.com
-      require: private
-      version: '>=1.0.4'
-    - name: idf
-      require: private
-      version: '>=4.4'
-    source:
-      registry_url: https://components.espressif.com/
-      type: service
-    version: 1.0.6
-  embedblocks/time-service:
-    component_hash: 459d6faea8419cd53d69804de104f7e3b21ebb67c4be327a126533e3cf34d3a4
-    dependencies:
-    - name: idf
-      require: private
-      version: '>=5.0.0'
-    source:
-      registry_url: https://components.espressif.com/
-      type: service
-    version: 1.0.3
   espressif/button:
     component_hash: a1f34e8ed2e61ffef1a230fd9477005c2db335c7e1f6a239f43e5f119dcbe1b0
     dependencies:
@@ -110,7 +86,7 @@ dependencies:
       require: private
       version: '>=4.4.2'
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     version: 1.2.1
   espressif/esp_muxer:
@@ -241,6 +217,30 @@ dependencies:
       registry_url: https://components.espressif.com/
       type: service
     version: 1.0.2
+  espressif/rmaker_common_events:
+    component_hash: ced95feff88c368e6306ff67ff3696ac76a5273de9fe1f907a7c115d4370fe6e
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.1'
+    source:
+      registry_url: https://components.espressif.com
+      type: service
+    version: 1.0.0
+  espressif/rmaker_time_sync:
+    component_hash: 5797d2fcd903cad6e9142981e1d0602d7b5efa2c9197a72da8d2e05be7ef568b
+    dependencies:
+    - name: espressif/rmaker_common_events
+      registry_url: https://components.espressif.com
+      require: private
+      version: ^1.0.0
+    - name: idf
+      require: private
+      version: '>=5.1'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.0.2
   idf:
     source:
       type: idf
@@ -253,18 +253,18 @@ dependencies:
       type: service
     version: 9.5.0
 direct_dependencies:
-- atanisoft/esp_lcd_touch_xpt2046
-- embedblocks/time-service
 - espressif/button
 - espressif/esp_audio_render
 - espressif/esp_codec_dev
+- espressif/esp_lcd_touch
 - espressif/esp_player
 - espressif/gmf_audio
 - espressif/gmf_core
 - espressif/gmf_io
 - espressif/media_lib_sal
+- espressif/rmaker_time_sync
 - idf
 - lvgl/lvgl
-manifest_hash: d1cbe705cb41d4833a1934661f2687b8866bba8db1caea1f6d929bf7a378d56e
+manifest_hash: 0bc08212d3e927e01bb35a0190e36861e21a19b099468e327adea513a7021d15
 target: esp32s3
 version: 3.0.0

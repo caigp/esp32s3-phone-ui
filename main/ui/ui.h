@@ -35,6 +35,7 @@ extern "C" {
 #include "screens/ui_wifi.h"
 #include "screens/ui_wifi_input_pwd.h"
 #include "screens/ui_calendar.h"
+#include "screens/ui_notification_panel.h"
 
 ///////////////////// VARIABLES ////////////////////
 
@@ -55,11 +56,10 @@ LV_IMG_DECLARE(ui_img_app_file_manager_png);    // assets/app_file_manager.png
 LV_IMG_DECLARE(ui_img_app_calc_png);    // assets/app_calc.png
 LV_IMG_DECLARE(ui_img_app_calendar_png);    // assets/app_calendar.png
 LV_IMG_DECLARE(ui_img_app_music_png);    // assets/app_music.png
-LV_IMG_DECLARE(ui_img_icon_wifi_small_png);    // assets/icon_wifi_small.png
 LV_IMG_DECLARE(ui_img_icon_volume_png);    // assets/icon_volume.png
 LV_IMG_DECLARE(ui_img_temp_rh_bg_png);    // assets/temp_RH_bg.png
-LV_IMG_DECLARE(ui_img_icon_heart_rate_png);    // assets/icon_heart_rate.png
 LV_IMG_DECLARE(ui_img_icon_spo2_png);    // assets/icon_spo2.png
+LV_IMG_DECLARE(ui_img_icon_heart_rate_png);    // assets/icon_heart_rate.png
 LV_IMG_DECLARE(ui_img_music_changpian_png);    // assets/music_changpian.png
 LV_IMG_DECLARE(ui_img_1330499080);    // assets/skip-back.png
 LV_IMG_DECLARE(ui_img_play_png);    // assets/play.png
@@ -71,8 +71,9 @@ LV_IMG_DECLARE(ui_img_item_game_png);    // assets/item_game.png
 LV_IMG_DECLARE(ui_img_icon_wifi_png);    // assets/icon_wifi.png
 LV_IMG_DECLARE(ui_img_icon_chevron_right_png);    // assets/icon_chevron_right.png
 LV_IMG_DECLARE(ui_img_icon_wifi_black_png);    // assets/icon_wifi_black.png
-LV_IMG_DECLARE(ui_img_icon_lock_png);    // assets/icon_lock.png
 LV_IMG_DECLARE(ui_img_icon_circle_check_png);    // assets/icon_circle_check.png
+LV_IMG_DECLARE(ui_img_icon_lock_png);    // assets/icon_lock.png
+LV_IMG_DECLARE(ui_img_icon_wifi_small_png);    // assets/icon_wifi_small.png
 
 // FONTS
 LV_FONT_DECLARE(ui_font_simhei14);

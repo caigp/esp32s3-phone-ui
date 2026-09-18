@@ -94,6 +94,7 @@ extern void osd_getmouse(int *x, int *y, int *button);
 
 /* build a filename for a snapshot, return -ve for error */
 extern int osd_makesnapname(char *filename, int len);
+extern void do_audio_frame();
 
 #endif /* !NSF_PLAYER */
 

@@ -15,10 +15,6 @@ void ui_event_file_manager(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
-    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_RIGHT) {
-        lv_indev_wait_release(lv_indev_active());
-        _ui_screen_change(&ui_launcher, LV_SCR_LOAD_ANIM_OUT_RIGHT, 300, 0, &ui_launcher_screen_init);
-    }
     if(event_code == LV_EVENT_SCREEN_LOADED) {
         file_manager_loaded(e);
     }

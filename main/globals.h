@@ -3,7 +3,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "lvgl.h"
-#include "time_service.h"
 #include "wifi.h"
 #include "esp_mac.h"
 
@@ -12,6 +11,10 @@ extern QueueHandle_t xGlobalsQueue;
 extern lv_obj_t *toast;
 extern lv_timer_t *toast_timer;
 extern TaskHandle_t wifi_scan_task;
+
+extern lv_obj_t * ui_statsusbar;
+extern lv_obj_t * ui_statusbar_time;
+extern lv_obj_t * ui_statusbar_wifi;
 
 #define VOLUME_DOWM         (0)
 #define VOLUME_UP           (1)
@@ -27,6 +30,8 @@ typedef struct {
 
 extern sys_config_t sys_config;   // 外部声明全局实例
 
+extern struct tm timeinfo;
+
 extern void set_volume(int volume);
 
 extern void show_toast(char *text);
@@ -34,3 +39,6 @@ extern void show_toast(char *text);
 extern void global_init();
 extern void time_sync();
 
+extern void init_status_bar();
+extern void init_notification_panel();
+extern void init_navigation_bar();

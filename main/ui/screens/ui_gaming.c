@@ -23,6 +23,9 @@ void ui_event_gaming(lv_event_t * e)
     if(event_code == LV_EVENT_SCREEN_LOADED) {
         gaming_loaded(e);
     }
+    if(event_code == LV_EVENT_SCREEN_UNLOADED) {
+        gaming_unloaded(e);
+    }
 }
 
 void ui_event_Label36(lv_event_t * e)

@@ -15,6 +15,7 @@
 #include "media_init.h"
 #include "wifi.h"
 #include "esp_mac.h"
+#include <time.h>
 
 static const char *TAG = "ui_event_handle";
 
@@ -30,6 +31,8 @@ static lv_obj_t * file_explorer;
 static int music_index = 0;
 
 static char *argv[1];
+
+static TaskHandle_t wifi_wait_TaskHandle = NULL;
 
 static void ui_event_game_item_cb(lv_event_t * e)
 {
@@ -150,7 +153,7 @@ static TaskHandle_t game_task = NULL;
 static void vGameScannTask(void *arg)
 {
     ui_lock();
-    lv_obj_clean(ui_Container49);
+    lv_obj_clean(ui_game_list);
     ui_unlock();
 
     ext_filter_t filters[] = {
@@ -178,7 +181,7 @@ static void vGameScannTask(void *arg)
         {
             ui_lock();
 
-            lv_obj_t *item = ui_simpleitem_create(ui_Container49);
+            lv_obj_t *item = ui_simpleitem_create(ui_game_list);
             lv_obj_t *text = ui_comp_get_child(item, UI_COMP_SIMPLEITEM_SIMPLE_ITEM_TEXT);
             lv_obj_t *image = ui_comp_get_child(item, UI_COMP_SIMPLEITEM_IMAGE14);
 
@@ -233,6 +236,10 @@ static void refresh_play_info_cb(lv_timer_t * timer)
 
 static void load_launcher(lv_timer_t *) {
     _ui_screen_change(&ui_launcher, LV_SCR_LOAD_ANIM_NONE, 0, 0, &ui_launcher_screen_init);
+
+    init_status_bar();
+    init_navigation_bar();
+    init_notification_panel();
 }
 
 static void duration_xcb(void *data) {
@@ -579,7 +586,7 @@ void music_loaded(lv_event_t * e)
 
     if (handle == NULL)
     {
-        xTaskCreate(vMusicScannTask, "music scann", 8192, NULL, 0, &music_task);
+        xTaskCreate(vMusicScannTask, "music scann", 8192, NULL, 5, &music_task);
     }
 }
 
@@ -658,7 +665,7 @@ void game_loaded(lv_event_t * e)
 {
     if (game_handle == NULL)
     {
-        xTaskCreate(vGameScannTask, "game scann", 8192, NULL, 0, &game_task);
+        xTaskCreate(vGameScannTask, "game scann", 8192, NULL, 5, &game_task);
     }
 }
 
@@ -701,7 +708,7 @@ void gaming_loaded(lv_event_t * e) {
 
 void gaming_unloaded(lv_event_t * e)
 {
-    // main_quit();
+    main_quit();
 }
 
 void nes_audio_callback(const void *src, size_t size)
@@ -864,7 +871,7 @@ void music_list_refresh(lv_event_t * e)
     ESP_LOGI(TAG, "%s", __func__);
     if (music_task == NULL)
     {
-        xTaskCreate(vMusicScannTask, "music scann", 8192, NULL, 0, &music_task);
+        xTaskCreate(vMusicScannTask, "music scann", 8192, NULL, 5, &music_task);
     }
     
 }
@@ -873,7 +880,7 @@ void game_list_refresh(lv_event_t * e)
 {
     if (game_task == NULL)
     {
-        xTaskCreate(vGameScannTask, "game scann", 8192, NULL, 0, &game_task);
+        xTaskCreate(vGameScannTask, "game scann", 8192, NULL, 5, &game_task);
     }
 }
 
@@ -931,10 +938,9 @@ void wifi_unloaded(lv_event_t * e){
 
 }
 
-static TaskHandle_t wifi_wait_TaskHandle = NULL;
-
 void wifi_wait_task(void *pvParameters)
 { 
+    xEventGroupClearBits(xWifiEventGroup, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT);
     EventBits_t uxBits = xEventGroupWaitBits(
         xWifiEventGroup,
         WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
@@ -964,8 +970,6 @@ void wifi_wait_task(void *pvParameters)
     vTaskDelete(NULL);
 }
 
-
-
 void wifi_pwd_done(lv_event_t * e)
 { 
     ESP_LOGI(TAG, "%s", __func__);
@@ -973,7 +977,7 @@ void wifi_pwd_done(lv_event_t * e)
 
     if (wifi_wait_TaskHandle == NULL)
     {
-        xTaskCreate(wifi_wait_task, "wifi wait", 4096, NULL, 0, &wifi_wait_TaskHandle);
+        xTaskCreate(wifi_wait_task, "wifi wait", 4096, NULL, 5, &wifi_wait_TaskHandle);
     }
 
     const char *password = lv_textarea_get_text(ui_wifi_pwd_TextArea);
@@ -1001,14 +1005,15 @@ void wifi_input_pwd_unloaded(lv_event_t * e)
 
 void calendar_loaded(lv_event_t * e)
 {
-    time_human_t out;
-    time_service_now_human(8 * 3600, &out);
+    uint32_t year = timeinfo.tm_year + 1900;
+    uint32_t month = timeinfo.tm_mon + 1;
+    uint32_t day = timeinfo.tm_mday;
 
-    lv_calendar_set_today_year(ui_Calendar_widget, out.year);
-    lv_calendar_set_today_month(ui_Calendar_widget, out.month);
-    lv_calendar_set_today_day(ui_Calendar_widget, out.day);
-    lv_calendar_set_shown_year(ui_Calendar_widget, out.year);
-    lv_calendar_set_shown_month(ui_Calendar_widget, out.month);
+    lv_calendar_set_today_year(ui_Calendar_widget, year);
+    lv_calendar_set_today_month(ui_Calendar_widget, month);
+    lv_calendar_set_today_day(ui_Calendar_widget, day);
+    lv_calendar_set_shown_year(ui_Calendar_widget, year);
+    lv_calendar_set_shown_month(ui_Calendar_widget, month);
     lv_calendar_set_chinese_mode(ui_Calendar_widget, true);
     
     static const char * day_names[7] = {"日", "一", "二", "三", "四", "五", "六"};
@@ -1016,9 +1021,9 @@ void calendar_loaded(lv_event_t * e)
 
 
     static lv_calendar_date_t highlighted_days[3];       /*Only its pointer will be saved so should be static*/
-    highlighted_days[0].year = out.year;
-    highlighted_days[0].month = out.month;
-    highlighted_days[0].day = out.day;
+    highlighted_days[0].year = year;
+    highlighted_days[0].month = month;
+    highlighted_days[0].day = day;
     lv_calendar_set_highlighted_dates(ui_Calendar_widget, highlighted_days, 1);
 
 }

@@ -15,6 +15,8 @@ extern void ui_wifi_input_pwd_screen_init(void);
 extern void ui_wifi_input_pwd_screen_destroy(void);
 extern void ui_event_wifi_input_pwd(lv_event_t * e);
 extern lv_obj_t * ui_wifi_input_pwd;
+extern lv_obj_t * ui_Container84;
+extern lv_obj_t * ui_Container85;
 extern lv_obj_t * ui_Container58;
 extern lv_obj_t * ui_wifi_pwd_TextArea;
 extern void ui_event_Checkbox1(lv_event_t * e);

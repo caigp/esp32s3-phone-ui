@@ -41,6 +41,7 @@
 #include "freertos/FreeRTOS.h"
 #include "esp_heap_caps.h"
 #include "esp_log.h"
+#include "esp_timer.h"
 
 #define  NES_CLOCK_DIVIDER    12
 //#define  NES_MASTER_CLOCK     21477272.727272727272
@@ -374,34 +375,58 @@ void nes_emulate(void)
 
    while (false == nes.poweroff)
    {
-      if (nofrendo_ticks != last_ticks)
-      {
-         int tick_diff = nofrendo_ticks - last_ticks;
+      // if (nofrendo_ticks != last_ticks)
+      // {
+      //    int tick_diff = nofrendo_ticks - last_ticks;
 
-         frames_to_render += tick_diff;
-         gui_tick(tick_diff);
-         last_ticks = nofrendo_ticks;
-      }
+      //    frames_to_render += tick_diff;
+      //    gui_tick(tick_diff);
+      //    last_ticks = nofrendo_ticks;
+      // }
+
+      // if (true == nes.pause)
+      // {
+      //    /* TODO: dim the screen, and pause/silence the apu */
+      //    system_video(false);
+      //    frames_to_render = 0;
+      // }
+      // else if (frames_to_render > 1)
+      // {
+      //    frames_to_render--;
+      //    nes_renderframe(true);
+      //    // system_video(true);
+      //    do_audio_frame();
+      // }
+      // else if ((1 == frames_to_render && true == nes.autoframeskip)
+      //          || false == nes.autoframeskip)
+      // {
+      //    frames_to_render = 0;
+      //    nes_renderframe(true);
+      //    system_video(true);
+      //    do_audio_frame();
+      // }
 
       if (true == nes.pause)
       {
-         /* TODO: dim the screen, and pause/silence the apu */
-         system_video(false);
-         frames_to_render = 0;
+         vTaskDelay(pdMS_TO_TICKS(10)); // 暂停时让出 CPU
+         continue;
       }
-      else if (frames_to_render > 1)
+
+      static bool draw_flag = true;
+      static int64_t last_draw_time_us = 0;
+      int64_t now_us = esp_timer_get_time(); // 获取 ESP32 当前系统的微秒数
+
+      // 40000 微秒 (us) = 40 毫秒 (ms) = 25 FPS
+      if (now_us - last_draw_time_us >= 50000) 
       {
-         frames_to_render--;
-         nes_renderframe(false);
-         system_video(false);
+         draw_flag = true;         // 提交当前帧画面
+         last_draw_time_us = now_us;   // 更新上次刷屏时间
       }
-      else if ((1 == frames_to_render && true == nes.autoframeskip)
-               || false == nes.autoframeskip)
-      {
-         frames_to_render = 0;
-         nes_renderframe(true);
-         system_video(true);
-      }
+
+      nes_renderframe(draw_flag); 
+      system_video(draw_flag);
+      do_audio_frame();
+      draw_flag = false;
    }
 
 }

@@ -66,6 +66,11 @@ int format_millis(uint64_t millis, char *buffer, size_t size, TimeFormat fmt) {
                           (unsigned int)hours, (unsigned int)minutes, 
                           (unsigned int)secs, (unsigned int)ms_part);
             break;
+        case TIME_FMT_HH_MM:
+                len = snprintf(buffer, size, "%02u:%02u", 
+                          (unsigned int)hours, (unsigned int)minutes);
+            break;
+
         default:
             return 0;
     }

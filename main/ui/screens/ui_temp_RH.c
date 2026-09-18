@@ -6,6 +6,8 @@
 #include "../ui.h"
 
 lv_obj_t * ui_temp_RH = NULL;
+lv_obj_t * ui_Container76 = NULL;
+lv_obj_t * ui_Container77 = NULL;
 lv_obj_t * ui_Image9 = NULL;
 lv_obj_t * ui_Container27 = NULL;
 lv_obj_t * ui_temp_Arc = NULL;
@@ -30,10 +32,6 @@ void ui_event_temp_RH(lv_event_t * e)
     if(event_code == LV_EVENT_SCREEN_UNLOADED) {
         temp_RH_unload(e);
     }
-    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP) {
-        lv_indev_wait_release(lv_indev_active());
-        _ui_screen_change(&ui_launcher, LV_SCR_LOAD_ANIM_OUT_TOP, 300, 0, &ui_launcher_screen_init);
-    }
 }
 
 // build funtions
@@ -42,8 +40,26 @@ void ui_temp_RH_screen_init(void)
 {
     ui_temp_RH = lv_obj_create(NULL);
     lv_obj_remove_flag(ui_temp_RH, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_flex_flow(ui_temp_RH, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(ui_temp_RH, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
 
-    ui_Image9 = lv_image_create(ui_temp_RH);
+    ui_Container76 = lv_obj_create(ui_temp_RH);
+    lv_obj_remove_style_all(ui_Container76);
+    lv_obj_set_height(ui_Container76, 25);
+    lv_obj_set_width(ui_Container76, lv_pct(100));
+    lv_obj_set_align(ui_Container76, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_Container76, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_Container76, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Container76, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Container77 = lv_obj_create(ui_temp_RH);
+    lv_obj_remove_style_all(ui_Container77);
+    lv_obj_set_width(ui_Container77, lv_pct(100));
+    lv_obj_set_flex_grow(ui_Container77, 1);
+    lv_obj_set_align(ui_Container77, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_Container77, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_Image9 = lv_image_create(ui_Container77);
     lv_image_set_src(ui_Image9, &ui_img_temp_rh_bg_png);
     lv_obj_set_width(ui_Image9, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Image9, LV_SIZE_CONTENT);    /// 1
@@ -51,7 +67,7 @@ void ui_temp_RH_screen_init(void)
     lv_obj_add_flag(ui_Image9, LV_OBJ_FLAG_CLICKABLE);     /// Flags
     lv_obj_remove_flag(ui_Image9, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_Container27 = lv_obj_create(ui_temp_RH);
+    ui_Container27 = lv_obj_create(ui_Container77);
     lv_obj_remove_style_all(ui_Container27);
     lv_obj_set_width(ui_Container27, lv_pct(75));
     lv_obj_set_height(ui_Container27, lv_pct(50));
@@ -96,7 +112,7 @@ void ui_temp_RH_screen_init(void)
     lv_obj_set_style_text_opa(ui_temp_tip, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_temp_tip, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Container28 = lv_obj_create(ui_temp_RH);
+    ui_Container28 = lv_obj_create(ui_Container77);
     lv_obj_remove_style_all(ui_Container28);
     lv_obj_set_width(ui_Container28, lv_pct(75));
     lv_obj_set_height(ui_Container28, lv_pct(50));
@@ -143,7 +159,7 @@ void ui_temp_RH_screen_init(void)
     lv_obj_set_style_text_opa(ui_RH_tip, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_RH_tip, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Container44 = lv_obj_create(ui_temp_RH);
+    ui_Container44 = lv_obj_create(ui_Container77);
     lv_obj_remove_style_all(ui_Container44);
     lv_obj_set_width(ui_Container44, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Container44, LV_SIZE_CONTENT);    /// 1
@@ -202,6 +218,8 @@ void ui_temp_RH_screen_destroy(void)
 
     // NULL screen variables
     ui_temp_RH = NULL;
+    ui_Container76 = NULL;
+    ui_Container77 = NULL;
     ui_Image9 = NULL;
     ui_Container27 = NULL;
     ui_temp_Arc = NULL;

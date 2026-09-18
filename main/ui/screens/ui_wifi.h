@@ -15,21 +15,23 @@ extern void ui_wifi_screen_init(void);
 extern void ui_wifi_screen_destroy(void);
 extern void ui_event_wifi(lv_event_t * e);
 extern lv_obj_t * ui_wifi;
+extern lv_obj_t * ui_Container82;
+extern lv_obj_t * ui_Container83;
 extern lv_obj_t * ui_Container55;
 extern lv_obj_t * ui_Label43;
 extern lv_obj_t * ui_wifi_scan_list;
-extern lv_obj_t * ui_wifi_scan_item;
-extern lv_obj_t * ui_Container56;
-extern lv_obj_t * ui_wifi_rssi;
-extern lv_obj_t * ui_wifi_ssid;
-extern lv_obj_t * ui_Container57;
-extern lv_obj_t * ui_wifi_auth_mode;
 extern lv_obj_t * ui_wifi_scan_item1;
 extern lv_obj_t * ui_Container59;
 extern lv_obj_t * ui_wifi_rssi1;
 extern lv_obj_t * ui_wifi_ssid1;
 extern lv_obj_t * ui_Container60;
 extern lv_obj_t * ui_wifi_auth_mode1;
+extern lv_obj_t * ui_wifi_scan_item2;
+extern lv_obj_t * ui_Container56;
+extern lv_obj_t * ui_wifi_rssi;
+extern lv_obj_t * ui_wifi_ssid;
+extern lv_obj_t * ui_Container57;
+extern lv_obj_t * ui_wifi_auth_mode;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

@@ -25,6 +25,7 @@ void game_loaded(lv_event_t * e);
 void game_list_refresh(lv_event_t * e);
 void gaming_paused(lv_event_t * e);
 void gaming_loaded(lv_event_t * e);
+void gaming_unloaded(lv_event_t * e);
 void gaming_resume(lv_event_t * e);
 void change_game_sound(lv_event_t * e);
 void gaming_exit(lv_event_t * e);

@@ -11,6 +11,7 @@ extern "C" {
 
 // 格式选项
 typedef enum {
+    TIME_FMT_HH_MM,
     TIME_FMT_MM_SS,       // 00:00
     TIME_FMT_HH_MM_SS,    // 00:00:00
     TIME_FMT_MM_SS_MS,    // 00:00.000

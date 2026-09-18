@@ -6,21 +6,13 @@
 #include "../ui.h"
 
 lv_obj_t * ui_Settings = NULL;
+lv_obj_t * ui_Container80 = NULL;
+lv_obj_t * ui_Container81 = NULL;
 lv_obj_t * ui_Container53 = NULL;
 lv_obj_t * ui_Image17 = NULL;
 lv_obj_t * ui_Label41 = NULL;
 lv_obj_t * ui_Image19 = NULL;
 // event funtions
-void ui_event_Settings(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_RIGHT) {
-        lv_indev_wait_release(lv_indev_active());
-        _ui_screen_change(&ui_launcher, LV_SCR_LOAD_ANIM_OUT_RIGHT, 300, 0, &ui_launcher_screen_init);
-    }
-}
-
 void ui_event_Container53(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -36,16 +28,38 @@ void ui_Settings_screen_init(void)
 {
     ui_Settings = lv_obj_create(NULL);
     lv_obj_remove_flag(ui_Settings, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_flex_flow(ui_Settings, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(ui_Settings, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     ui_object_set_themeable_style_property(ui_Settings, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_COLOR,
                                            _ui_theme_color_white);
     ui_object_set_themeable_style_property(ui_Settings, LV_PART_MAIN | LV_STATE_DEFAULT, LV_STYLE_BG_OPA,
                                            _ui_theme_alpha_white);
-    lv_obj_set_style_pad_left(ui_Settings, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_Settings, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_Settings, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_Settings, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Container53 = lv_obj_create(ui_Settings);
+    ui_Container80 = lv_obj_create(ui_Settings);
+    lv_obj_remove_style_all(ui_Container80);
+    lv_obj_set_height(ui_Container80, 25);
+    lv_obj_set_width(ui_Container80, lv_pct(100));
+    lv_obj_set_align(ui_Container80, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_Container80, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_Container80, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Container80, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Container81 = lv_obj_create(ui_Settings);
+    lv_obj_remove_style_all(ui_Container81);
+    lv_obj_set_width(ui_Container81, lv_pct(100));
+    lv_obj_set_flex_grow(ui_Container81, 1);
+    lv_obj_set_align(ui_Container81, LV_ALIGN_CENTER);
+    lv_obj_set_flex_flow(ui_Container81, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(ui_Container81, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    lv_obj_remove_flag(ui_Container81, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_pad_left(ui_Container81, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(ui_Container81, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_Container81, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_Container81, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_row(ui_Container81, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_column(ui_Container81, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Container53 = lv_obj_create(ui_Container81);
     lv_obj_remove_style_all(ui_Container53);
     lv_obj_set_height(ui_Container53, 50);
     lv_obj_set_width(ui_Container53, lv_pct(100));
@@ -80,7 +94,6 @@ void ui_Settings_screen_init(void)
     lv_obj_remove_flag(ui_Image19, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
     lv_obj_add_event_cb(ui_Container53, ui_event_Container53, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_Settings, ui_event_Settings, LV_EVENT_ALL, NULL);
 
 }
 
@@ -90,6 +103,8 @@ void ui_Settings_screen_destroy(void)
 
     // NULL screen variables
     ui_Settings = NULL;
+    ui_Container80 = NULL;
+    ui_Container81 = NULL;
     ui_Container53 = NULL;
     ui_Image17 = NULL;
     ui_Label41 = NULL;

@@ -23,19 +23,19 @@
 #define PIN_NUM_TOUCH_IRQ  GPIO_NUM_NC
 
 
-#define I2C_MASTER_SCL_IO   GPIO_NUM_9   /*!< GPIO number for I2C master clock */
-#define I2C_MASTER_SDA_IO   GPIO_NUM_8   /*!< GPIO number for I2C master data  */
+#define I2C_MASTER_SCL_IO   21   /*!< GPIO number for I2C master clock */
+#define I2C_MASTER_SDA_IO   47   /*!< GPIO number for I2C master data  */
 #define I2C_MASTER_NUM      I2C_NUM_0               /*!< I2C port number for master dev */
 #define I2C_MASTER_FREQ_HZ  100000                  /*!< I2C master clock frequency */
 
 /* 内存卡模块 */
-#define SD_SCK          5
-#define SD_MISO         4
-#define SD_MOSI         6
-#define SD_CS           7
+#define SD_SCK          6
+#define SD_MISO         7
+#define SD_MOSI         5
+#define SD_CS           4
 #define SD_MOUNT_PATH   "/sdcard"
 
 
-#define SPK_BCLK_GPIO  GPIO_NUM_21
-#define SPK_WS_GPIO    GPIO_NUM_14
+#define SPK_BCLK_GPIO  GPIO_NUM_14
+#define SPK_WS_GPIO    GPIO_NUM_13
 #define SPK_DOUT_GPIO  GPIO_NUM_10   // MAX98357 DIN

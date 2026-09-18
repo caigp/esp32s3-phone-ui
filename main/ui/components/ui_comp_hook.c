@@ -9,10 +9,10 @@ void ui_comp_simpleitem_create_hook(lv_obj_t * comp)
 {
 }
 
-void ui_comp_volumeslider_create_hook(lv_obj_t * comp)
+void ui_comp_toast_create_hook(lv_obj_t * comp)
 {
 }
 
-void ui_comp_toast_create_hook(lv_obj_t * comp)
+void ui_comp_volumeslider_create_hook(lv_obj_t * comp)
 {
 }

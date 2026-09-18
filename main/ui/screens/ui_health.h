@@ -13,8 +13,16 @@ extern "C" {
 // SCREEN: ui_health
 extern void ui_health_screen_init(void);
 extern void ui_health_screen_destroy(void);
-extern void ui_event_health(lv_event_t * e);
 extern lv_obj_t * ui_health;
+extern lv_obj_t * ui_Container72;
+extern lv_obj_t * ui_Container71;
+extern lv_obj_t * ui_Container69;
+extern lv_obj_t * ui_Button6;
+extern lv_obj_t * ui_Label54;
+extern lv_obj_t * ui_Label55;
+extern lv_obj_t * ui_Container70;
+extern lv_obj_t * ui_Image24;
+extern lv_obj_t * ui_Label56;
 extern lv_obj_t * ui_Container31;
 extern lv_obj_t * ui_Button1;
 extern lv_obj_t * ui_Label28;
@@ -22,13 +30,6 @@ extern lv_obj_t * ui_Label30;
 extern lv_obj_t * ui_Container36;
 extern lv_obj_t * ui_Image11;
 extern lv_obj_t * ui_Label29;
-extern lv_obj_t * ui_Container32;
-extern lv_obj_t * ui_Button2;
-extern lv_obj_t * ui_Label31;
-extern lv_obj_t * ui_Label33;
-extern lv_obj_t * ui_Container34;
-extern lv_obj_t * ui_Image13;
-extern lv_obj_t * ui_Label34;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

@@ -15,6 +15,8 @@ extern void ui_music_screen_init(void);
 extern void ui_music_screen_destroy(void);
 extern void ui_event_music(lv_event_t * e);
 extern lv_obj_t * ui_music;
+extern lv_obj_t * ui_Container74;
+extern lv_obj_t * ui_Container73;
 extern lv_obj_t * ui_Container42;
 extern lv_obj_t * ui_musci_changpian;
 extern lv_obj_t * ui_music_info_label;

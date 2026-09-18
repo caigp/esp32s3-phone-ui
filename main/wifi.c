@@ -257,6 +257,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         // s_retry_num = 0;
 
         xEventGroupSetBits(xWifiEventGroup, WIFI_CONNECTED_BIT);
+            
         time_sync();
         isconnected = true;
         lv_timer_set_repeat_count(lv_timer_create(show_statusbar_wifi, 0, NULL), 1);
@@ -362,18 +363,18 @@ static void vWifiScanTask(void *pvParameters)
         // 获取当前连接的 AP 信息
         esp_err_t ret = esp_wifi_sta_get_ap_info(&c_ap_info);
         if (ret == ESP_OK) {
-            ESP_LOGI(TAG, "=== 当前 WiFi 信息 ===");
-            ESP_LOGI(TAG, "SSID: %s", c_ap_info.ssid);
-            ESP_LOGI(TAG, "RSSI: %d dBm", c_ap_info.rssi);
-            ESP_LOGI(TAG, "Channel: %d", c_ap_info.primary);
-            ESP_LOGI(TAG, "Authmode: %d", c_ap_info.authmode);
-            ESP_LOGI(TAG, "Pairwise Cipher: %d", c_ap_info.pairwise_cipher);
-            ESP_LOGI(TAG, "Group Cipher: %d", c_ap_info.group_cipher);
+            // ESP_LOGI(TAG, "=== 当前 WiFi 信息 ===");
+            // ESP_LOGI(TAG, "SSID: %s", c_ap_info.ssid);
+            // ESP_LOGI(TAG, "RSSI: %d dBm", c_ap_info.rssi);
+            // ESP_LOGI(TAG, "Channel: %d", c_ap_info.primary);
+            // ESP_LOGI(TAG, "Authmode: %d", c_ap_info.authmode);
+            // ESP_LOGI(TAG, "Pairwise Cipher: %d", c_ap_info.pairwise_cipher);
+            // ESP_LOGI(TAG, "Group Cipher: %d", c_ap_info.group_cipher);
             
             // 打印 MAC 地址
-            ESP_LOGI(TAG, "BSSID: " MACSTR, MAC2STR(c_ap_info.bssid));
+            // ESP_LOGI(TAG, "BSSID: " MACSTR, MAC2STR(c_ap_info.bssid));
         } else {
-            ESP_LOGW(TAG, "获取 WiFi 信息失败: %s", esp_err_to_name(ret));
+            // ESP_LOGW(TAG, "获取 WiFi 信息失败: %s", esp_err_to_name(ret));
 
             esp_wifi_connect();
         }
@@ -388,13 +389,13 @@ static void vWifiScanTask(void *pvParameters)
                 wifi_ap_record_t *ap_copy = malloc(sizeof(wifi_ap_record_t));
                 memcpy(ap_copy, &ap_info[i], sizeof(wifi_ap_record_t));
 
-                ESP_LOGI(TAG, "SSID \t\t%s", ap_info[i].ssid);
-                ESP_LOGI(TAG, "RSSI \t\t%d", ap_info[i].rssi);
-                ESP_LOGI(TAG, "authmode \t\t%d", ap_info[i].authmode);
+                // ESP_LOGI(TAG, "SSID \t\t%s", ap_info[i].ssid);
+                // ESP_LOGI(TAG, "RSSI \t\t%d", ap_info[i].rssi);
+                // ESP_LOGI(TAG, "authmode \t\t%d", ap_info[i].authmode);
 
                 ui_lock();
 
-                ui_wifi_scan_item = lv_obj_create(ui_wifi_scan_list);
+                lv_obj_t *ui_wifi_scan_item = lv_obj_create(ui_wifi_scan_list);
                 lv_obj_remove_style_all(ui_wifi_scan_item);
                 lv_obj_set_height(ui_wifi_scan_item, 43);
                 lv_obj_set_width(ui_wifi_scan_item, lv_pct(100));
@@ -409,7 +410,7 @@ static void vWifiScanTask(void *pvParameters)
                 lv_obj_set_align(ui_Container56, LV_ALIGN_BOTTOM_MID);
                 lv_obj_set_flex_flow(ui_Container56, LV_FLEX_FLOW_ROW);
                 lv_obj_set_flex_align(ui_Container56, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-                lv_obj_remove_flag(ui_Container56, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+                lv_obj_remove_flag(ui_Container56, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_PRESS_LOCK);      /// Flags
                 lv_obj_set_style_radius(ui_Container56, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_bg_color(ui_Container56, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
                 lv_obj_set_style_bg_opa(ui_Container56, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -490,6 +491,6 @@ void wifi_scan_init()
 {
     if (wifi_scan_task == NULL)
     {
-        xTaskCreate(vWifiScanTask, "wifi scann", 8192, NULL, 0, &wifi_scan_task);
+        xTaskCreate(vWifiScanTask, "wifi scann", 8192, NULL, 5, &wifi_scan_task);
     }
 }

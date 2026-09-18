@@ -15,6 +15,8 @@ extern void ui_temp_RH_screen_init(void);
 extern void ui_temp_RH_screen_destroy(void);
 extern void ui_event_temp_RH(lv_event_t * e);
 extern lv_obj_t * ui_temp_RH;
+extern lv_obj_t * ui_Container76;
+extern lv_obj_t * ui_Container77;
 extern lv_obj_t * ui_Image9;
 extern lv_obj_t * ui_Container27;
 extern lv_obj_t * ui_temp_Arc;

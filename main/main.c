@@ -10,7 +10,7 @@
 #include "esp_lcd_panel_vendor.h"
 #include "esp_lcd_panel_ops.h"
 #include "esp_lcd_panel_st7789.h"
-#include "esp_lcd_touch_xpt2046.h"
+#include "esp_lcd_touch.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_timer.h"
@@ -38,6 +38,9 @@ static const char *TAG = "MAIN";
 #define EXAMPLE_LVGL_TASK_MIN_DELAY_MS  1000 / CONFIG_FREERTOS_HZ
 #define EXAMPLE_LVGL_TASK_STACK_SIZE    8192
 #define EXAMPLE_LVGL_TASK_PRIORITY      5
+
+
+extern void example_lvgl_demo_ui(lv_display_t *disp);
 
 /* Rotate display and touch, when rotated screen in LVGL. Called when driver parameters are updated. */
 static void example_lvgl_port_update_callback(lv_display_t *disp)
@@ -254,8 +257,8 @@ void app_main(void)
     ui_lock();
     ui_init();
     ui_unlock();
-    
-    //打开背光
+
+    /* 打开背光 */
     bl_on();
 
     global_init();

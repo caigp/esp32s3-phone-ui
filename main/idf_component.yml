@@ -2,7 +2,6 @@ dependencies:
   idf:
     version: '>=4.1.0'
 
-  atanisoft/esp_lcd_touch_xpt2046: ^1.0.6
   lvgl/lvgl: ^9.2.0
   espressif/esp_player: ^1.0.6
   espressif/esp_codec_dev: ^1.6.2
@@ -13,4 +12,4 @@ dependencies:
   espressif/media_lib_sal: ^1.0.2
 
   espressif/button: ^4.2.1
-  embedblocks/time-service: ^1.0.3
+  espressif/rmaker_time_sync: ^1.0.2

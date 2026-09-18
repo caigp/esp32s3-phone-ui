@@ -38,9 +38,6 @@ lv_obj_t * ui_page3 = NULL;
 lv_obj_t * ui_Container4 = NULL;
 lv_obj_t * ui_Image5 = NULL;
 lv_obj_t * ui_Label4 = NULL;
-lv_obj_t * ui_statsusbar = NULL;
-lv_obj_t * ui_statusbar_time = NULL;
-lv_obj_t * ui_statusbar_wifi = NULL;
 lv_obj_t * ui_volumeslider2 = NULL;
 lv_obj_t * ui_Image18 = NULL;
 // event funtions
@@ -153,7 +150,7 @@ void ui_launcher_screen_init(void)
     lv_obj_remove_flag(ui_Container26, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SNAPPABLE |
                        LV_OBJ_FLAG_SCROLL_CHAIN);     /// Flags
     lv_obj_set_scrollbar_mode(ui_Container26, LV_SCROLLBAR_MODE_OFF);
-    lv_obj_set_scroll_snap_x(ui_Container26, LV_SCROLL_SNAP_CENTER);
+    lv_obj_set_scroll_snap_x(ui_Container26, LV_SCROLL_SNAP_START);
 
     ui_page1 = lv_obj_create(ui_Container26);
     lv_obj_remove_style_all(ui_page1);
@@ -462,33 +459,6 @@ void ui_launcher_screen_init(void)
     lv_obj_set_style_text_opa(ui_Label4, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_Label4, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_statsusbar = lv_obj_create(ui_launcher);
-    lv_obj_remove_style_all(ui_statsusbar);
-    lv_obj_set_height(ui_statsusbar, 20);
-    lv_obj_set_width(ui_statsusbar, lv_pct(100));
-    lv_obj_remove_flag(ui_statsusbar, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_bg_color(ui_statsusbar, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_statsusbar, 76, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    ui_statusbar_time = lv_label_create(ui_statsusbar);
-    lv_obj_set_width(ui_statusbar_time, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_statusbar_time, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_statusbar_time, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_statusbar_time, "12:00");
-    lv_obj_set_style_text_color(ui_statusbar_time, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_statusbar_time, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    ui_statusbar_wifi = lv_image_create(ui_statsusbar);
-    lv_image_set_src(ui_statusbar_wifi, &ui_img_icon_wifi_small_png);
-    lv_obj_set_width(ui_statusbar_wifi, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_statusbar_wifi, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_x(ui_statusbar_wifi, 10);
-    lv_obj_set_y(ui_statusbar_wifi, 0);
-    lv_obj_set_align(ui_statusbar_wifi, LV_ALIGN_LEFT_MID);
-    lv_obj_add_flag(ui_statusbar_wifi, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_CLICKABLE);     /// Flags
-    lv_obj_remove_flag(ui_statusbar_wifi, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_image_set_inner_align(ui_statusbar_wifi, LV_IMAGE_ALIGN_STRETCH);
-
     ui_volumeslider2 = lv_slider_create(ui_launcher);
     lv_slider_set_value(ui_volumeslider2, 50, LV_ANIM_OFF);
     if(lv_slider_get_mode(ui_volumeslider2) == LV_SLIDER_MODE_RANGE) lv_slider_set_left_value(ui_volumeslider2, 0,
@@ -570,9 +540,6 @@ void ui_launcher_screen_destroy(void)
     ui_Container4 = NULL;
     ui_Image5 = NULL;
     ui_Label4 = NULL;
-    ui_statsusbar = NULL;
-    ui_statusbar_time = NULL;
-    ui_statusbar_wifi = NULL;
     ui_volumeslider2 = NULL;
     ui_Image18 = NULL;
 

@@ -6,16 +6,13 @@
 #include "../ui.h"
 
 lv_obj_t * ui_calendar = NULL;
+lv_obj_t * ui_Container75 = NULL;
 lv_obj_t * ui_Calendar_widget = NULL;
 // event funtions
 void ui_event_calendar(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
-    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_active()) == LV_DIR_TOP) {
-        lv_indev_wait_release(lv_indev_active());
-        _ui_screen_change(&ui_launcher, LV_SCR_LOAD_ANIM_OUT_TOP, 300, 0, &ui_launcher_screen_init);
-    }
     if(event_code == LV_EVENT_SCREEN_LOADED) {
         calendar_loaded(e);
     }
@@ -27,12 +24,23 @@ void ui_calendar_screen_init(void)
 {
     ui_calendar = lv_obj_create(NULL);
     lv_obj_remove_flag(ui_calendar, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_flex_flow(ui_calendar, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(ui_calendar, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     lv_obj_set_style_text_font(ui_calendar, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Container75 = lv_obj_create(ui_calendar);
+    lv_obj_remove_style_all(ui_Container75);
+    lv_obj_set_height(ui_Container75, 25);
+    lv_obj_set_width(ui_Container75, lv_pct(100));
+    lv_obj_set_align(ui_Container75, LV_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_Container75, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_Container75, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_Container75, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Calendar_widget = lv_calendar_create(ui_calendar);
     lv_obj_t * ui_Calendar_widget_header = lv_calendar_header_arrow_create(ui_Calendar_widget);
     lv_obj_set_width(ui_Calendar_widget, lv_pct(100));
-    lv_obj_set_height(ui_Calendar_widget, lv_pct(100));
+    lv_obj_set_flex_grow(ui_Calendar_widget, 1);
     lv_obj_set_align(ui_Calendar_widget, LV_ALIGN_CENTER);
 
     lv_obj_add_event_cb(ui_calendar, ui_event_calendar, LV_EVENT_ALL, NULL);
@@ -45,6 +53,7 @@ void ui_calendar_screen_destroy(void)
 
     // NULL screen variables
     ui_calendar = NULL;
+    ui_Container75 = NULL;
     ui_Calendar_widget = NULL;
 
 }

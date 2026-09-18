@@ -9,4 +9,3 @@ add_compile_definitions(
 )
 
 project(xiaocai_esp32_project)
-

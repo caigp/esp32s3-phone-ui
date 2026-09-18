@@ -54,6 +54,18 @@ static const char *TAG = "VIDEO AUDIO";
 
 #define  REFRESH_RATE         60
 
+// 标准 64 色 NES RGB565 调色板 (标准 RGB565 格式)
+const uint16_t nes_palette_rgb565[64] = {
+    0x738E, 0x20D6, 0x0015, 0x4013, 0x880E, 0xA802, 0xA000, 0x7840,
+    0x4140, 0x0200, 0x0280, 0x01C2, 0x19CB, 0x0000, 0x0000, 0x0000,
+    0xBDF7, 0x039D, 0x21DD, 0x801B, 0xB813, 0xE007, 0xD800, 0xB180,
+    0x6B80, 0x0380, 0x0480, 0x03C3, 0x03CB, 0x0000, 0x0000, 0x0000,
+    0xFFFF, 0x3DFE, 0x5CD1, 0x9A3F, 0xF27F, 0xF257, 0xF340, 0xF4A0,
+    0xB5C0, 0x4DE0, 0x2E27, 0x1E32, 0x0619, 0x0000, 0x0000, 0x0000,
+    0xFFFF, 0xAEFF, 0xC5FF, 0xDDBF, 0xFDDF, 0xFCD6, 0xFDCE, 0xFE27,
+    0xE68E, 0xBEEF, 0x9F73, 0x9F7B, 0x073B, 0x0000, 0x0000, 0x0000
+};
+
 TimerHandle_t timer;
 
 volatile short key_board = 0xff;
@@ -87,11 +99,10 @@ static uint16_t *audio_frame;
 #endif
 
 FILE *f;
-
-static void do_audio_frame() {
+void do_audio_frame() {
 
 #if CONFIG_SOUND_ENA
-	int left=DEFAULT_SAMPLERATE/24;
+	int left=DEFAULT_SAMPLERATE/REFRESH_RATE;
 	while(left) {
 		int n=DEFAULT_FRAGSIZE;
 		if (n>left) n=left;
@@ -231,15 +242,40 @@ static int set_mode(int width, int height,  int pitch)
 /* copy nes palette over to hardware */
 static void set_palette(rgb_t *pal)
 {
-	uint16 c;
-   int i;
+    
+// 	uint16 c;
+//    int i;
 
-   for (i = 0; i < 256; i++)
-   {
-      c=(pal[i].b>>3)+((pal[i].g>>2)<<5)+((pal[i].r>>3)<<11);
-      myPalette[i]=c;
-   }
+//    for (i = 0; i < 256; i++)
+//    {
+//     // ESP_LOGI(TAG, "%d %d %d\n", pal[i].r, pal[i].g, pal[i].b);
+//       c=(pal[i].b>>3)+((pal[i].g>>2)<<5)+((pal[i].r>>3)<<11);
+//         // c = (pal[i].r >> 3) + ((pal[i].g >> 2) << 5) + ((pal[i].b >> 3) << 11);
+//       myPalette[i]=c;
+//    }
 
+}
+
+void init_256_nes_palette(bool swap_bytes, bool is_bgr) {
+    for (int i = 0; i < 256; i++) {
+        // 使用 % 64 或 & 0x3F 自动循环映射 64 基础色
+        uint16_t color = nes_palette_rgb565[i & 0x3F]; 
+        
+        // BGR 通道对调处理
+        if (is_bgr) {
+            uint16_t r = (color >> 11) & 0x1F;
+            uint16_t g = (color >> 5) & 0x3F;
+            uint16_t b = color & 0x1F;
+            color = (b << 11) | (g << 5) | r;
+        }
+
+        // 字节序颠倒处理
+        if (swap_bytes) {
+            color = __builtin_bswap16(color);
+        }
+
+        myPalette[i] = color;
+    }
 }
 
 /* clear all frames to a particular color */
@@ -284,14 +320,11 @@ static void custom_blit(bitmap_t *bmp, int num_dirties, rect_t *dirty_rects) {
     
     for (int i = 0; i < pixel_count; i++) {
         rgb565_fb[i] = myPalette[src[i]];
+        // rgb565_fb[i] = 0x8410;
     }
 
     // 3. 直接调用 LVGL 更新函数
     nes_video_callback(rgb565_fb);
-    if (sound)
-    {
-        do_audio_frame();
-    }
 }
 
 /*
@@ -429,6 +462,7 @@ static int logprint(const char *string)
 int osd_init()
 {
 	log_chain_logfunc(logprint);
+    init_256_nes_palette(false, false);
 
 	if (osd_init_sound())
 		return -1;

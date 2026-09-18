@@ -11,7 +11,6 @@
 #include "esp_lcd_panel_vendor.h"
 #include "esp_lcd_panel_ops.h"
 #include "esp_lcd_panel_st7789.h"
-#include "esp_lcd_touch_xpt2046.h"
 #include "driver/i2c_master.h"
 #include "esp_vfs_fat.h"
 #include "driver/sdspi_host.h"
@@ -29,6 +28,9 @@
 #include <sys/stat.h>
 
 #include "board.h"
+#include "esp_lcd_touch.h"
+#include "esp_lcd_touch_ft6x36.h"
+#include "esp_spiffs.h"
 
 #ifdef __cplusplus
 extern "C" {

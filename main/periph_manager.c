@@ -1,44 +1,91 @@
 // periph_manager.c
 #include "periph_manager.h"
 
+
 static const char *TAG = "periph_manager";
 
 i2c_master_bus_handle_t g_i2c_bus = NULL;
 esp_lcd_panel_handle_t panel_handle = NULL;
 esp_lcd_panel_io_handle_t io_handle = NULL;
-esp_lcd_touch_handle_t tp = NULL;
 
 i2s_chan_handle_t tx_chan = NULL;
 
-// ...
+esp_lcd_touch_handle_t tp;
 
 /* XPT2046 */
 static void touch_init()
 {
 
-    esp_lcd_panel_io_handle_t tp_io_handle = NULL;
-    esp_lcd_panel_io_spi_config_t tp_io_config =
+    // esp_lcd_panel_io_handle_t tp_io_handle = NULL;
+    // esp_lcd_panel_io_spi_config_t tp_io_config =
 
-    ESP_LCD_TOUCH_IO_SPI_XPT2046_CONFIG(PIN_NUM_TOUCH_CS);
+    // ESP_LCD_TOUCH_IO_SPI_XPT2046_CONFIG(PIN_NUM_TOUCH_CS);
 
-    // Attach the TOUCH to the SPI bus
-    ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)TOUCH_HOST, &tp_io_config, &tp_io_handle));
+    // // Attach the TOUCH to the SPI bus
+    // ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi((esp_lcd_spi_bus_handle_t)TOUCH_HOST, &tp_io_config, &tp_io_handle));
+
+    // esp_lcd_touch_config_t tp_cfg = {
+    //     .x_max = LCD_H_RES,
+    //     .y_max = LCD_V_RES,
+    //     .rst_gpio_num = -1,
+    //     .int_gpio_num = PIN_NUM_TOUCH_IRQ,
+    //     .flags = {
+    //         .swap_xy = 0,
+    //         .mirror_x = 0,
+    //         .mirror_y = 1,
+    //     },
+    // };
+
+    // ESP_LOGI(TAG, "Initialize touch controller XPT2046");
+    // ESP_ERROR_CHECK(esp_lcd_touch_new_spi_xpt2046(tp_io_handle, &tp_cfg, &tp));
+    
+    esp_lcd_panel_io_handle_t tp_io_handle;
+    
+    esp_lcd_panel_io_i2c_config_t io_config = ESP_LCD_TOUCH_IO_I2C_FT6x36_CONFIG();
+    io_config.scl_speed_hz = 100000;
+    esp_lcd_new_panel_io_i2c(g_i2c_bus, &io_config, &tp_io_handle);
 
     esp_lcd_touch_config_t tp_cfg = {
         .x_max = LCD_H_RES,
         .y_max = LCD_V_RES,
-        .rst_gpio_num = -1,
-        .int_gpio_num = PIN_NUM_TOUCH_IRQ,
-        .flags = {
-            .swap_xy = 0,
-            .mirror_x = 0,
-            .mirror_y = 1,
-        },
+        .rst_gpio_num = 11,
+        .int_gpio_num = -1,
+        // .levels = {
+        //     .reset = 1,
+        //     .interrupt = 0,
+        // },
+        // .flags = {
+        //     .swap_xy = 0,
+        //     .mirror_x = 0,
+        //     .mirror_y = 0,
+        // },
     };
 
-    ESP_LOGI(TAG, "Initialize touch controller XPT2046");
-    ESP_ERROR_CHECK(esp_lcd_touch_new_spi_xpt2046(tp_io_handle, &tp_cfg, &tp));
+    esp_lcd_touch_new_i2c_ft6x36(tp_io_handle, &tp_cfg, &tp);
+    
+    /* 触摸阈值 */
+    esp_lcd_panel_io_tx_param(tp_io_handle, 0x80, (uint8_t[]) {0x40}, 1);
+    /* peak阈值 */
+    esp_lcd_panel_io_tx_param(tp_io_handle, 0x81, (uint8_t[]) {0x08}, 1);
+}
 
+
+void lcd_fill_red(esp_lcd_panel_handle_t panel)
+{
+    size_t sz = LCD_H_RES * LCD_V_RES * sizeof(uint16_t);
+    uint16_t *buf = heap_caps_malloc(sz, MALLOC_CAP_DMA);
+    if (!buf) {
+        ESP_LOGE("LCD", "malloc fail");
+        return;
+    }
+
+    for (int i = 0; i < LCD_H_RES * LCD_V_RES; i++) {
+        buf[i] = 0xff00;
+    }
+
+    esp_lcd_panel_draw_bitmap(panel, 0, 0, LCD_H_RES, LCD_V_RES, buf);
+
+    free(buf);
 }
 
 static void lcd_init()
@@ -73,6 +120,36 @@ static void lcd_init()
 
     // user can flush pre-defined pattern to the screen before we turn on the screen or backlight
     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
+
+    // 0x20: Display Inversion OFF (关闭硬件反色)
+    // 0x21: Display Inversion ON  (开启硬件反色)
+    esp_lcd_panel_io_tx_param(io_handle, 0x21, NULL, 0);
+    // 0x55 表示 16 bits/pixel (RGB565)
+    // esp_lcd_panel_io_tx_param(io_handle, 0x3A, (uint8_t[]){ 0x55 }, 1);
+
+    // 0x55 表示 MCU 接口和 RGB 接口均使用 16-bit/pixel (RGB565)
+    // uint8_t pixel_format = 0x55;
+    // esp_lcd_panel_io_tx_param(io_handle, 0x3A, &pixel_format, 1);
+
+    // // 发送 Gamma Curve Set 指令 (0x26)，选择默认 Gamma 曲线 1
+    // uint8_t gamma_curve = 0x01;// 可尝试 0x01, 0x02, 0x04, 0x08
+    // esp_lcd_panel_io_tx_param(io_handle, 0x26, &gamma_curve, 1);
+
+    // // 降低 VCOM 电压，通常能让“发白”的画面变沉稳、黑色更纯粹
+    // // 参数范围一般在 0x00 ~ 0x7F 之间，可以尝试在 0x1A 到 0x3E 之间微调
+    // uint8_t vcom_setting[] = { 0x2B, 0x2B }; // 默认值通常在 0x3E 左右，适当调小该值
+    // esp_lcd_panel_io_tx_param(io_handle, 0xC5, vcom_setting, 2);
+
+    // // 1. 开启正常显示模式 (Normal Display Mode On)
+    // esp_lcd_panel_io_tx_param(io_handle, 0x13, NULL, 0);
+
+    // // 2. 配置 Frame Rate 控制 (0xB1)，降低或升高刷新率有时能改善泛白
+    // // 默认为 0x00, 0x1B (约 70Hz)
+    // uint8_t frame_rate[] = { 0x00, 0x18 }; 
+    // esp_lcd_panel_io_tx_param(io_handle, 0xB1, frame_rate, 2);
+
+    // esp_lcd_panel_invert_color(panel_handle, true);
+    // lcd_fill_red(panel_handle);
 }
 
 static void sd_test_rw()
@@ -301,17 +378,25 @@ void periph_manager_init(void)
 {
     ESP_LOGI(TAG, "periph_manager_init start");
 
+    // 1. 初始化并挂载 SPIFFS
+    esp_vfs_spiffs_conf_t conf = {
+        .base_path = "/spiffs",
+        .partition_label = "storage",
+        .max_files = 5,
+        .format_if_mount_failed = true
+    };
+    esp_vfs_spiffs_register(&conf);
+
     // I2C
-    // i2c_master_bus_config_t bus_cfg = {
-    //     .i2c_port = I2C_MASTER_NUM,
-    //     .sda_io_num = I2C_MASTER_SDA_IO,
-    //     .scl_io_num = I2C_MASTER_SCL_IO,
-    //     .clk_source = I2C_CLK_SRC_DEFAULT,
-    //     .glitch_ignore_cnt = 7,
-    //     .flags.enable_internal_pullup = true,
-    // };
-    // esp_err_t ret = i2c_new_master_bus(&bus_cfg, &g_i2c_bus);
-    // ESP_LOGI("periph", "i2c init ret: %d", ret);
+    i2c_master_bus_config_t bus_cfg = {
+        .i2c_port = I2C_MASTER_NUM,
+        .sda_io_num = I2C_MASTER_SDA_IO,
+        .scl_io_num = I2C_MASTER_SCL_IO,
+        .clk_source = I2C_CLK_SRC_DEFAULT,
+        .glitch_ignore_cnt = 7,
+        .flags.enable_internal_pullup = true,
+    };
+    esp_err_t ret = i2c_new_master_bus(&bus_cfg, &g_i2c_bus);
 
     // SPI LCD
     ESP_LOGI(TAG, "初始化spi_bus");
