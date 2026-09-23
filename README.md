@@ -130,7 +130,7 @@ NES 模拟器的按键映射逻辑如下：
 
 1.  克隆本仓库到您的本地机器：
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/caigp/esp32s3-phone-ui.git
     cd xiaocai_esp32_project
     ```
 
