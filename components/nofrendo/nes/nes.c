@@ -412,21 +412,58 @@ void nes_emulate(void)
          continue;
       }
 
-      static bool draw_flag = true;
-      static int64_t last_draw_time_us = 0;
-      int64_t now_us = esp_timer_get_time(); // 获取 ESP32 当前系统的微秒数
+      // 静态变量：维持跨帧状态
+      static int64_t target_time_us = 0;   // 下一帧预期的系统时间戳
+      static bool draw_flag = true;         // 是否渲染当前帧
+      static int skip_count = 0;            // 连续跳帧计数
 
-      // 40000 微秒 (us) = 40 毫秒 (ms) = 25 FPS
-      if (now_us - last_draw_time_us >= 50000) 
-      {
-         draw_flag = true;         // 提交当前帧画面
-         last_draw_time_us = now_us;   // 更新上次刷屏时间
+      const int64_t FRAME_INTERVAL = 16666; // 60 FPS 标准帧间隔 (us)
+      const int MAX_SKIP_FRAMES = 3;        // 允许的最大连续跳帧数
+
+      int64_t frame_start_us = esp_timer_get_time();
+
+      // 首次运行初始化时间基准
+      if (target_time_us == 0) {
+         target_time_us = frame_start_us;
       }
 
-      nes_renderframe(draw_flag); 
+      // 1. 执行 NES 核心逻辑与渲染
+      nes_renderframe(draw_flag);
       system_video(draw_flag);
-      do_audio_frame();
-      draw_flag = false;
+      do_audio_frame(); // 建议使用 I2S DMA 异步推流，避免在此处阻塞
+
+      int64_t frame_end_us = esp_timer_get_time();
+
+      // 2. 推进预期的下一帧时间节点
+      target_time_us += FRAME_INTERVAL;
+
+      // 3. 时间控制与动态跳帧决策
+      if (frame_end_us < target_time_us) {
+         // 运行速度快于 60FPS，休眠补齐差值
+         int64_t delay_us = target_time_us - frame_end_us;
+         uint32_t delay_ms = delay_us / 1000;
+         
+         if (delay_ms > 0) {
+            vTaskDelay(pdMS_TO_TICKS(delay_ms));
+         }
+         
+         // 进度追上，下一帧正常渲染
+         draw_flag = true;
+         skip_count = 0;
+      } else {
+         // 运行耗时超过 16.6ms（超时）
+         if (skip_count < MAX_SKIP_FRAMES) {
+            // 允许下一帧不绘制，快速跑完 CPU 逻辑以追赶时间
+            draw_flag = false;
+            skip_count++;
+         } else {
+            // 达到最大跳帧上限，强制渲染一帧，防止画面冻结
+            draw_flag = true;
+            skip_count = 0;
+            target_time_us = frame_end_us;
+         }
+      }
+
    }
 
 }

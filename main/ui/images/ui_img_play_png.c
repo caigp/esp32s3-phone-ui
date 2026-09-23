@@ -60,6 +60,7 @@ const lv_image_dsc_t ui_img_play_png = {
   .header.magic = LV_IMAGE_HEADER_MAGIC,
   .header.w = 30,
   .header.h = 30,
+  .header.stride = 30,
   .data_size = 1924,
   .data = ui_img_play_png_map,
 };

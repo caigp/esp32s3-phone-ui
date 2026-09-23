@@ -42,6 +42,7 @@ void ui_calendar_screen_init(void)
     lv_obj_set_width(ui_Calendar_widget, lv_pct(100));
     lv_obj_set_flex_grow(ui_Calendar_widget, 1);
     lv_obj_set_align(ui_Calendar_widget, LV_ALIGN_CENTER);
+    lv_obj_set_style_pad_bottom(ui_Calendar_widget, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_calendar, ui_event_calendar, LV_EVENT_ALL, NULL);
 

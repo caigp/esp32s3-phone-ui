@@ -4,9 +4,9 @@
 static const char *TAG = "media_init";
 
 static const audio_codec_data_if_t *data_if = NULL;
-static esp_codec_dev_handle_t codec_dev = NULL;
 static esp_gmf_pool_handle_t s_pool = NULL;
 
+esp_codec_dev_handle_t codec_dev = NULL;
 esp_audio_render_handle_t s_render = NULL;
 
 lv_obj_t * volume_slider;
@@ -71,7 +71,7 @@ void esp_codec_dev_init(void)
 {
     audio_codec_i2s_cfg_t i2s_cfg = {
         .port = I2S_NUM_0,
-        .rx_handle = NULL,
+        .rx_handle = rx_chan,
         .tx_handle = tx_chan,
     };
     data_if = audio_codec_new_i2s_data(&i2s_cfg);
@@ -79,16 +79,16 @@ void esp_codec_dev_init(void)
     esp_codec_dev_cfg_t dev_cfg = {
         .codec_if = NULL,
         .data_if = data_if,
-        .dev_type = ESP_CODEC_DEV_TYPE_OUT,
+        .dev_type = ESP_CODEC_DEV_TYPE_IN_OUT,
     };
     codec_dev = esp_codec_dev_new(&dev_cfg);
 
-    esp_codec_dev_sample_info_t output_fs = {
+    esp_codec_dev_sample_info_t fs = {
         .sample_rate = SAMPLE_RATE,
         .channel = CHANNEL,
         .bits_per_sample = SLOT_BITS,
     };
-    esp_codec_dev_open(codec_dev, &output_fs);
+    esp_codec_dev_open(codec_dev, &fs);
     static esp_codec_dev_vol_map_t volume_maps[] = {
         {.vol = 0, .db_value = -100},
         {.vol = 10, .db_value = -46},
@@ -186,11 +186,42 @@ void hide_timer_cb(lv_timer_t *user_data)
     lv_timer_pause(hide_timer);
 }
 
+/* 包装函数：缩放 */
+static void anim_scale_cb(void *obj, int32_t value)
+{
+    lv_obj_set_style_transform_scale_x((lv_obj_t*)obj, value, 0);
+    lv_obj_set_style_transform_scale_y((lv_obj_t*)obj, value, 0);
+}
+
 void async_xcb(void *user_data)
 {
+    bool hidden_flag = lv_obj_has_flag(volume_slider, LV_OBJ_FLAG_HIDDEN);
+
     lv_slider_set_value(volume_slider, sys_config.volume, LV_ANIM_ON);
-    lv_obj_remove_flag(volume_slider, LV_OBJ_FLAG_HIDDEN);
-    
+
+    if (hidden_flag)
+    {    
+        lv_obj_remove_flag(volume_slider, LV_OBJ_FLAG_HIDDEN);
+        
+        /* 设置变换中心点为对象中心 */
+        lv_obj_set_style_transform_pivot_x(volume_slider, lv_obj_get_width(volume_slider) / 2, 0);
+        lv_obj_set_style_transform_pivot_y(volume_slider, lv_obj_get_height(volume_slider) / 2, 0);
+
+        /* 初始状态：缩小到 0 */
+        lv_obj_set_style_transform_scale_x(volume_slider, 0, 0);
+        lv_obj_set_style_transform_scale_y(volume_slider, 0, 0);
+
+        /* 缩放动画 */
+        lv_anim_t a;
+        lv_anim_init(&a);
+        lv_anim_set_var(&a, volume_slider);
+        lv_anim_set_exec_cb(&a, anim_scale_cb);
+        lv_anim_set_values(&a, 0, 256);  /* 256 = 100% */
+        lv_anim_set_time(&a, 200);
+        lv_anim_set_path_cb(&a, lv_anim_path_ease_out);
+        lv_anim_start(&a);
+    }
+
     if (hide_timer == NULL)
     {
         hide_timer = lv_timer_create(hide_timer_cb, 3000, NULL);

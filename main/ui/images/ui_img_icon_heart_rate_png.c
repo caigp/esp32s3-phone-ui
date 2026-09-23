@@ -78,6 +78,7 @@ const lv_image_dsc_t ui_img_icon_heart_rate_png = {
   .header.magic = LV_IMAGE_HEADER_MAGIC,
   .header.w = 24,
   .header.h = 24,
+  .header.stride = 48,
   .data_size = 576 * 3,
   .data = ui_img_icon_heart_rate_png_map,
 };

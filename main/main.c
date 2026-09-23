@@ -29,6 +29,9 @@
 #include "wifi.h"
 #include "nvs_flash.h"
 #include "lv_demos.h"
+#include "sd_file_cache.h"
+#include "wav_header.h"
+#include "esp_coze_chat.h"
 
 static const char *TAG = "MAIN";
 
@@ -243,6 +246,7 @@ void init_system_handler()
     }
     
 }
+
 
 void app_main(void)
 {

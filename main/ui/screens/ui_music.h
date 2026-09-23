@@ -17,6 +17,11 @@ extern void ui_event_music(lv_event_t * e);
 extern lv_obj_t * ui_music;
 extern lv_obj_t * ui_Container74;
 extern lv_obj_t * ui_Container73;
+
+// 歌词页面 UI 句柄
+extern lv_obj_t * ui_Container_lrc;
+extern lv_obj_t * ui_lrc_list;
+
 extern lv_obj_t * ui_Container42;
 extern lv_obj_t * ui_musci_changpian;
 extern lv_obj_t * ui_music_info_label;
@@ -48,11 +53,23 @@ extern lv_obj_t * ui_Container45;
 extern lv_obj_t * ui_simpleitem2;
 extern lv_obj_t * ui_Image12;
 extern lv_obj_t * ui_simple_item_text1;
+
 // CUSTOM VARIABLES
+
+// 歌词结构体与 API 声明
+typedef struct {
+    uint32_t time_ms;
+    char *text;
+} lrc_line_t;
+
+bool lrc_parse(const char *lrc_str);
+bool lrc_parse_file(const char *file_path);
+bool lrc_parse_by_audio_path(const char *audio_path); // 传入音频路径自动加载同名 .lrc 歌词
+void lrc_update_time(uint32_t current_ms);
+void lrc_clear(void);
 
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif
 
 #endif
-

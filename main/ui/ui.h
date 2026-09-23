@@ -36,6 +36,7 @@ extern "C" {
 #include "screens/ui_wifi_input_pwd.h"
 #include "screens/ui_calendar.h"
 #include "screens/ui_notification_panel.h"
+#include "screens/ui_clock.h"
 
 ///////////////////// VARIABLES ////////////////////
 

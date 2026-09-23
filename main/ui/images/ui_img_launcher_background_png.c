@@ -349,6 +349,7 @@ const lv_image_dsc_t ui_img_launcher_background_png = {
   .header.magic = LV_IMAGE_HEADER_MAGIC,
   .header.w = 240,
   .header.h = 320,
+  .header.stride = 240 * 2,
   .data_size = 76800 * 2,
   .data = ui_img_launcher_background_png_map,
 };

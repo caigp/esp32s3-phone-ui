@@ -21,6 +21,7 @@
 #include "lvgl.h"
 
 extern esp_audio_render_handle_t s_render;
+extern esp_codec_dev_handle_t codec_dev;
 
 extern void global_media_init();
 extern void global_media_deinit();

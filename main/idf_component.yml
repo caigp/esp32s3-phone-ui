@@ -13,3 +13,5 @@ dependencies:
 
   espressif/button: ^4.2.1
   espressif/rmaker_time_sync: ^1.0.2
+  espressif/esp_coze: ^1.0.0
+  espressif/esp-sr: ^2.5.3

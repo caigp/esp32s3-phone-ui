@@ -50,6 +50,7 @@ const lv_image_dsc_t ui_img_icon_lock_png = {
   .header.magic = LV_IMAGE_HEADER_MAGIC,
   .header.w = 20,
   .header.h = 20,
+  .header.stride = 10,
   .data_size = 264,
   .data = ui_img_icon_lock_png_map,
 };

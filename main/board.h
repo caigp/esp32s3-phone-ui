@@ -29,13 +29,18 @@
 #define I2C_MASTER_FREQ_HZ  100000                  /*!< I2C master clock frequency */
 
 /* 内存卡模块 */
-#define SD_SCK          6
-#define SD_MISO         7
-#define SD_MOSI         5
-#define SD_CS           4
-#define SD_MOUNT_PATH   "/sdcard"
+#define SD_SCK              6
+#define SD_MISO             7
+#define SD_MOSI             5
+#define SD_CS               4
+#define SD_MOUNT_PATH       "/sdcard"
+#define DIR_MUSIC           SD_MOUNT_PATH "/Music"
+#define DIR_GAME            SD_MOUNT_PATH "/Game"
+#define DIR_RECORD          SD_MOUNT_PATH "/Record"
+#define DIR_MOVIE           SD_MOUNT_PATH "/Movie"
 
 
 #define SPK_BCLK_GPIO  GPIO_NUM_14
 #define SPK_WS_GPIO    GPIO_NUM_13
 #define SPK_DOUT_GPIO  GPIO_NUM_10   // MAX98357 DIN
+#define MIC_DINT_GPIO  GPIO_NUM_12

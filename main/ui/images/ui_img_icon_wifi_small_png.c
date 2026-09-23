@@ -70,6 +70,7 @@ const lv_image_dsc_t ui_img_icon_wifi_small_png = {
   .header.magic = LV_IMAGE_HEADER_MAGIC,
   .header.w = 20,
   .header.h = 20,
+  .header.stride = 40,
   .data_size = 400 * 3,
   .data = ui_img_icon_wifi_small_png_map,
 };

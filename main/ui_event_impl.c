@@ -68,6 +68,7 @@ static void ui_event_item_cb(lv_event_t * e)
 
         //设置正在播放的歌名
         lv_label_set_text(ui_music_info_label, file_info->name);
+        lrc_parse_by_audio_path(file_info->path);
 
         music_index = (int) lv_obj_get_user_data(obj);
     }
@@ -90,6 +91,7 @@ static void vMusicScannTask(void *arg)
 
     ext_filter_t filters[] = {
         {"mp3", 1},
+        {"wav", 1},
     };
 
     char buf[20];
@@ -97,11 +99,11 @@ static void vMusicScannTask(void *arg)
 
     if (handle != NULL)
     {
-        file_list_rescan_with_filters(handle, 0, filters, 1, 0);
+        file_list_rescan_with_filters(handle, 0, filters, 2, 0);
     }
     else
     {
-        handle = file_list_create_ex(buf, 0, filters, 1, 0);
+        handle = file_list_create_ex(buf, 0, filters, 2, 0);
     }
     
     file_list_print_all(handle);
@@ -122,8 +124,7 @@ static void vMusicScannTask(void *arg)
             ESP_LOGI(TAG, "path = %s, name = %s", file_info.path, file_info.name);
             lv_label_set_text(text, file_info.name);
             lv_image_set_src(image, &ui_img_item_music_png);
-
-            lv_obj_set_y(item, i * 50);
+            
             lv_obj_set_user_data(item, (void *) i);
 
             file_info_t * info = lv_malloc(sizeof(file_info_t));
@@ -138,6 +139,7 @@ static void vMusicScannTask(void *arg)
             {
                 //设置正在播放的歌名
                 lv_label_set_text(ui_music_info_label, file_info.name);
+                lrc_parse_by_audio_path(file_info.path);
             }
 
             ui_unlock();
@@ -232,6 +234,8 @@ static void refresh_play_info_cb(lv_timer_t * timer)
 
     lv_label_set_text(ui_music_cur_time, FORMAT_SECONDS(current_time / 1000));
     lv_slider_set_value(ui_music_seek, current_time / 1000, LV_ANIM_OFF);
+
+    lrc_update_time(current_time);
 }
 
 static void load_launcher(lv_timer_t *) {
@@ -270,6 +274,7 @@ static void previous_play_music(void *data)
 
         //设置正在播放的歌名
         lv_label_set_text(ui_music_info_label, info.name);
+        lrc_parse_by_audio_path(info.path);
     }
 }
 
@@ -291,6 +296,7 @@ static void next_play_music(void *data)
 
         //设置正在播放的歌名
         lv_label_set_text(ui_music_info_label, info.name);
+        lrc_parse_by_audio_path(info.path);
     }
 }
 
@@ -536,6 +542,7 @@ void music_action(lv_event_t * e)
 
                 //设置正在播放的歌名
                 lv_label_set_text(ui_music_info_label, info.name);
+                lrc_parse_by_audio_path(info.path);
             }
         }
     }
@@ -777,14 +784,14 @@ void nes_video_deinit()
 void gaming_paused(lv_event_t * e)
 {
     nes_toggle_pause();
-    lv_obj_remove_flag(ui_Container50, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(ui_gaming_dialog, LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_event_cb(ui_gaming, ui_event_gaming);
 }
 
 void gaming_resume(lv_event_t * e)
 {
     nes_toggle_pause();
-    lv_obj_add_flag(ui_Container50, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ui_gaming_dialog, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_event_cb(ui_gaming, ui_event_gaming, LV_EVENT_ALL, NULL);
 }
 
@@ -792,7 +799,7 @@ void gaming_exit(lv_event_t * e)
 {
     main_quit();
     lv_obj_add_event_cb(ui_gaming, ui_event_gaming, LV_EVENT_ALL, NULL);
-    lv_obj_add_flag(ui_Container50, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(ui_gaming_dialog, LV_OBJ_FLAG_HIDDEN);
     _ui_screen_change(&ui_nes_game, LV_SCR_LOAD_ANIM_OUT_RIGHT, 300, 0, &ui_launcher_screen_init);
 }
 
@@ -1005,7 +1012,7 @@ void wifi_input_pwd_unloaded(lv_event_t * e)
 
 void calendar_loaded(lv_event_t * e)
 {
-    uint32_t year = timeinfo.tm_year + 1900;
+    uint32_t year = timeinfo.tm_year + 1956;
     uint32_t month = timeinfo.tm_mon + 1;
     uint32_t day = timeinfo.tm_mday;
 

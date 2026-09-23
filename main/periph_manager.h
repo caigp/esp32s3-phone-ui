@@ -38,9 +38,9 @@ extern "C" {
 
 #define LVGL_DRAW_BUF_LINES             (80)
 
-#define SAMPLE_RATE    44100
-#define SLOT_BITS      I2S_DATA_BIT_WIDTH_16BIT
-#define CHANNEL        I2S_SLOT_MODE_MONO
+#define SAMPLE_RATE             (44100)
+#define SLOT_BITS               I2S_DATA_BIT_WIDTH_16BIT
+#define CHANNEL                 I2S_SLOT_MODE_MONO
 
 // === I2C ===
 extern i2c_master_bus_handle_t g_i2c_bus;
@@ -52,6 +52,7 @@ extern esp_lcd_touch_handle_t tp;
 
 // === I2S ===
 extern i2s_chan_handle_t tx_chan;
+extern i2s_chan_handle_t rx_chan;
 
 // 初始化所有外设（按需调用）
 void periph_manager_init(void);

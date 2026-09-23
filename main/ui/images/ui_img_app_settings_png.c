@@ -126,6 +126,7 @@ const lv_image_dsc_t ui_img_app_settings_png = {
   .header.magic = LV_IMAGE_HEADER_MAGIC,
   .header.w = 48,
   .header.h = 48,
+  .header.stride = 96,
   .data_size = 2304 * 3,
   .data = ui_img_app_settings_png_map,
 };

@@ -7,6 +7,7 @@
 
 lv_obj_t * ui_gaming = NULL;
 lv_obj_t * ui_game_video = NULL;
+lv_obj_t * ui_gaming_dialog = NULL;
 lv_obj_t * ui_Container50 = NULL;
 lv_obj_t * ui_Label36 = NULL;
 lv_obj_t * ui_game_sound_label = NULL;
@@ -71,14 +72,25 @@ void ui_gaming_screen_init(void)
     lv_obj_add_flag(ui_game_video, LV_OBJ_FLAG_CLICKABLE);     /// Flags
     lv_obj_remove_flag(ui_game_video, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
-    ui_Container50 = lv_obj_create(ui_gaming);
+    ui_gaming_dialog = lv_obj_create(ui_gaming);
+    lv_obj_remove_style_all(ui_gaming_dialog);
+    lv_obj_add_flag(ui_gaming_dialog, LV_OBJ_FLAG_FLOATING);
+    lv_obj_set_size(ui_gaming_dialog, lv_pct(100), lv_pct(100));
+    lv_obj_align(ui_gaming_dialog, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_style_bg_color(ui_gaming_dialog, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_bg_opa(ui_gaming_dialog, 160, 0);
+    lv_obj_set_style_border_width(ui_gaming_dialog, 0, 0);
+    lv_obj_set_style_pad_all(ui_gaming_dialog, 0, 0);
+    lv_obj_clear_flag(ui_gaming_dialog, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(ui_gaming_dialog, LV_OBJ_FLAG_HIDDEN);
+
+    ui_Container50 = lv_obj_create(ui_gaming_dialog);
     lv_obj_remove_style_all(ui_Container50);
     lv_obj_set_width(ui_Container50, lv_pct(60));
     lv_obj_set_height(ui_Container50, LV_SIZE_CONTENT);    /// 50
     lv_obj_set_align(ui_Container50, LV_ALIGN_CENTER);
     lv_obj_set_flex_flow(ui_Container50, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(ui_Container50, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_add_flag(ui_Container50, LV_OBJ_FLAG_HIDDEN);     /// Flags
     lv_obj_remove_flag(ui_Container50, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE |
                        LV_OBJ_FLAG_SCROLLABLE);     /// Flags
     lv_obj_set_style_radius(ui_Container50, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -105,8 +117,10 @@ void ui_gaming_screen_init(void)
     lv_obj_set_style_text_font(ui_Label36, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_Label36, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_Label36, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_Label36, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_Label36, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_Label36, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_Label36, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_Label36, lv_color_hex(0x000000), LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(ui_Label36, 160, 0);
 
     ui_game_sound_label = lv_label_create(ui_Container50);
     lv_obj_set_width(ui_game_sound_label, lv_pct(100));
@@ -122,8 +136,10 @@ void ui_gaming_screen_init(void)
     lv_obj_set_style_text_font(ui_game_sound_label, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_game_sound_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_game_sound_label, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_game_sound_label, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_game_sound_label, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_game_sound_label, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_game_sound_label, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_game_sound_label, lv_color_hex(0x000000), LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(ui_game_sound_label, 160, 0);
 
     ui_Label38 = lv_label_create(ui_Container50);
     lv_obj_set_width(ui_Label38, lv_pct(100));
@@ -139,8 +155,10 @@ void ui_gaming_screen_init(void)
     lv_obj_set_style_text_font(ui_Label38, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_Label38, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_Label38, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_Label38, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_Label38, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(ui_Label38, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(ui_Label38, 15, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(ui_Label38, lv_color_hex(0x000000), LV_STATE_PRESSED);
+    lv_obj_set_style_bg_opa(ui_Label38, 160, 0);
 
     lv_obj_add_event_cb(ui_Label36, ui_event_Label36, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_game_sound_label, ui_event_game_sound_label, LV_EVENT_ALL, NULL);

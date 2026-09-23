@@ -100,6 +100,10 @@ static uint16_t *audio_frame;
 
 FILE *f;
 void do_audio_frame() {
+    if (!sound)
+    {
+        return;
+    }
 
 #if CONFIG_SOUND_ENA
 	int left=DEFAULT_SAMPLERATE/REFRESH_RATE;

@@ -270,6 +270,7 @@ const lv_image_dsc_t ui_img_music_changpian_png = {
   .header.magic = LV_IMAGE_HEADER_MAGIC,
   .header.w = 120,
   .header.h = 120,
+  .header.stride = 240,
   .data_size = 14400 * 3,
   .data = ui_img_music_changpian_png_map,
 };

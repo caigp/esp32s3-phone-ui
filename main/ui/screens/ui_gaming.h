@@ -17,6 +17,7 @@ extern void ui_event_gaming(lv_event_t * e);
 extern lv_obj_t * ui_gaming;
 extern lv_obj_t * ui_game_video;
 extern lv_obj_t * ui_Container50;
+extern lv_obj_t * ui_gaming_dialog;
 extern void ui_event_Label36(lv_event_t * e);
 extern lv_obj_t * ui_Label36;
 extern void ui_event_game_sound_label(lv_event_t * e);

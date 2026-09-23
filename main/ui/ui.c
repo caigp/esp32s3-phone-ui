@@ -45,6 +45,7 @@ void ui_init(void)
     ui_wifi_input_pwd_screen_init();
     ui_calendar_screen_init();
     ui_notification_panel_screen_init();
+    ui_clock_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
     lv_disp_load_scr(ui_boot);
 }
@@ -65,4 +66,5 @@ void ui_destroy(void)
     ui_wifi_input_pwd_screen_destroy();
     ui_calendar_screen_destroy();
     ui_notification_panel_screen_destroy();
+    ui_clock_screen_destroy();
 }

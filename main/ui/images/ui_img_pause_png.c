@@ -60,6 +60,7 @@ const lv_image_dsc_t ui_img_pause_png = {
   .header.magic = LV_IMAGE_HEADER_MAGIC,
   .header.w = 30,
   .header.h = 30,
+  .header.stride = 15,
   .data_size = 514,
   .data = ui_img_pause_png_map,
 };

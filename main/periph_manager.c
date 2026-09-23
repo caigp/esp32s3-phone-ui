@@ -9,6 +9,7 @@ esp_lcd_panel_handle_t panel_handle = NULL;
 esp_lcd_panel_io_handle_t io_handle = NULL;
 
 i2s_chan_handle_t tx_chan = NULL;
+i2s_chan_handle_t rx_chan = NULL;
 
 esp_lcd_touch_handle_t tp;
 
@@ -64,7 +65,7 @@ static void touch_init()
     esp_lcd_touch_new_i2c_ft6x36(tp_io_handle, &tp_cfg, &tp);
     
     /* 触摸阈值 */
-    esp_lcd_panel_io_tx_param(tp_io_handle, 0x80, (uint8_t[]) {0x40}, 1);
+    esp_lcd_panel_io_tx_param(tp_io_handle, 0x80, (uint8_t[]) {0x30}, 1);
     /* peak阈值 */
     esp_lcd_panel_io_tx_param(tp_io_handle, 0x81, (uint8_t[]) {0x08}, 1);
 }
@@ -209,6 +210,26 @@ void list_files(const char *base_path) {
     closedir(dp);
 }
 
+static void create_default_dirs(void) {
+    const char* dirs[] = {
+        DIR_MUSIC,
+        DIR_GAME,
+        DIR_RECORD,
+        DIR_MOVIE,
+    };
+    
+    for (int i = 0; i < sizeof(dirs)/sizeof(dirs[0]); i++) {
+        struct stat st;
+        if (stat(dirs[i], &st) == 0 && S_ISDIR(st.st_mode)) {
+            ESP_LOGI(TAG, "已存在: %s", dirs[i]);
+        } else if (mkdir(dirs[i], 0755) == 0) {
+            ESP_LOGI(TAG, "创建成功: %s", dirs[i]);
+        } else {
+            ESP_LOGE(TAG, "创建失败: %s", dirs[i]);
+        }
+    }
+}
+
 static void init_sd()
 {
     ESP_LOGI(TAG, "init sd");
@@ -251,6 +272,8 @@ static void init_sd()
 
     sdmmc_card_print_info(stdout, card);
 
+    create_default_dirs();
+    
     // 8. 卸载（实际产品里在掉电前调）
     // esp_vfs_fat_sdcard_unmount(SD_MOUNT_PATH, card);
     // spi_bus_free(host.slot);
@@ -285,9 +308,9 @@ static void play_tone(float freq_hz, int duration_ms, float amplitude)
 static void init_speaker(void)
 {
 
-    i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_1, I2S_ROLE_MASTER);
+    i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
     chan_cfg.auto_clear = true;   // 无数据时自动清 0，避免杂音
-    ESP_ERROR_CHECK(i2s_new_channel(&chan_cfg, &tx_chan, NULL));
+    ESP_ERROR_CHECK(i2s_new_channel(&chan_cfg, &tx_chan, &rx_chan));
 
     i2s_std_config_t std_cfg = {
         .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(SAMPLE_RATE),
@@ -297,7 +320,7 @@ static void init_speaker(void)
             .bclk = SPK_BCLK_GPIO,
             .ws   = SPK_WS_GPIO,
             .dout = SPK_DOUT_GPIO,
-            .din  = I2S_GPIO_UNUSED,
+            .din  = MIC_DINT_GPIO,
             .invert_flags = {
                 .mclk_inv = false,
                 .bclk_inv = false,
@@ -306,9 +329,11 @@ static void init_speaker(void)
         },
     };
 
-
+    
     ESP_ERROR_CHECK(i2s_channel_init_std_mode(tx_chan, &std_cfg));
+    ESP_ERROR_CHECK(i2s_channel_init_std_mode(rx_chan, &std_cfg));
     ESP_ERROR_CHECK(i2s_channel_enable(tx_chan));
+    ESP_ERROR_CHECK(i2s_channel_enable(rx_chan));
     ESP_LOGI(TAG, "MAX98357 I2S TX ready: BCLK=5 WS=6 DOUT=4 @ %dHz", SAMPLE_RATE);
 
     // /* C 大调音名 -> 频率 */

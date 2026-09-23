@@ -4,10 +4,18 @@
 // Project name: xiaocaiUI
 
 #include "../ui.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 lv_obj_t * ui_music = NULL;
 lv_obj_t * ui_Container74 = NULL;
 lv_obj_t * ui_Container73 = NULL;
+
+// 歌词页面句柄
+lv_obj_t * ui_Container_lrc = NULL;
+lv_obj_t * ui_lrc_list = NULL;
+
 lv_obj_t * ui_Container42 = NULL;
 lv_obj_t * ui_musci_changpian = NULL;
 lv_obj_t * ui_music_info_label = NULL;
@@ -33,6 +41,14 @@ lv_obj_t * ui_Container45 = NULL;
 lv_obj_t * ui_simpleitem2 = NULL;
 lv_obj_t * ui_Image12 = NULL;
 lv_obj_t * ui_simple_item_text1 = NULL;
+
+#define MAX_LRC_LINES 250
+
+static lrc_line_t g_lrc_lines[MAX_LRC_LINES];
+static lv_obj_t*  g_lrc_labels[MAX_LRC_LINES];
+static int        g_lrc_count = 0;
+static int        g_current_index = -1;
+
 // event funtions
 void ui_event_music(lv_event_t * e)
 {
@@ -132,10 +148,44 @@ void ui_music_screen_init(void)
     lv_obj_set_align(ui_Container73, LV_ALIGN_CENTER);
     lv_obj_set_flex_flow(ui_Container73, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(ui_Container73, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-    lv_obj_set_scroll_snap_x(ui_Container73, LV_SCROLL_SNAP_START);
+    
+    // 水平单页切页设置，防连滑透传
+    lv_obj_set_scroll_dir(ui_Container73, LV_DIR_HOR);
+    lv_obj_add_flag(ui_Container73, LV_OBJ_FLAG_SCROLL_ONE);
+    lv_obj_remove_flag(ui_Container73, LV_OBJ_FLAG_SCROLL_MOMENTUM);
+    lv_obj_set_scroll_snap_x(ui_Container73, LV_SCROLL_SNAP_CENTER);
+    lv_obj_set_scrollbar_mode(ui_Container73, LV_SCROLLBAR_MODE_OFF);
+    
     lv_obj_set_style_bg_color(ui_Container73, lv_color_hex(0x3D3D3D), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_Container73, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
+    /* ================= PAGE 1 (左侧): 歌词页面 ================= */
+    ui_Container_lrc = lv_obj_create(ui_Container73);
+    lv_obj_remove_style_all(ui_Container_lrc);
+    lv_obj_set_width(ui_Container_lrc, lv_pct(100));
+    lv_obj_set_height(ui_Container_lrc, lv_pct(100));
+    lv_obj_set_align(ui_Container_lrc, LV_ALIGN_CENTER);
+    lv_obj_set_scroll_snap_x(ui_Container_lrc, LV_SCROLL_SNAP_CENTER);
+
+    ui_lrc_list = lv_obj_create(ui_Container_lrc);
+    lv_obj_set_width(ui_lrc_list, lv_pct(100));
+    lv_obj_set_height(ui_lrc_list, lv_pct(100));
+    lv_obj_set_align(ui_lrc_list, LV_ALIGN_CENTER);
+    
+    // 歌词只垂直滚动，水平拖动向上透传给 Container73 切页
+    lv_obj_set_scroll_dir(ui_lrc_list, LV_DIR_VER);
+    lv_obj_add_flag(ui_lrc_list, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_GESTURE_BUBBLE);
+    lv_obj_set_scrollbar_mode(ui_lrc_list, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_flex_flow(ui_lrc_list, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(ui_lrc_list, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    
+    lv_obj_set_style_bg_opa(ui_lrc_list, 0, LV_PART_MAIN);
+    lv_obj_set_style_border_width(ui_lrc_list, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_top(ui_lrc_list, 110, LV_PART_MAIN);
+    lv_obj_set_style_pad_bottom(ui_lrc_list, 110, LV_PART_MAIN);
+    lv_obj_set_style_pad_row(ui_lrc_list, 12, LV_PART_MAIN);
+
+    /* ================= PAGE 2 (中间): 唱片与控制界面 ================= */
     ui_Container42 = lv_obj_create(ui_Container73);
     lv_obj_remove_style_all(ui_Container42);
     lv_obj_set_width(ui_Container42, lv_pct(100));
@@ -234,7 +284,6 @@ void ui_music_screen_init(void)
     lv_obj_set_style_pad_top(ui_music_seek, 2, LV_PART_KNOB | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_bottom(ui_music_seek, 2, LV_PART_KNOB | LV_STATE_DEFAULT);
 
-    //Compensating for LVGL9.1 draw crash with bar/slider max value when top-padding is nonzero and right-padding is 0
     if(lv_obj_get_style_pad_top(ui_music_seek, LV_PART_MAIN) > 0) lv_obj_set_style_pad_right(ui_music_seek,
                                                                                                  lv_obj_get_style_pad_right(ui_music_seek, LV_PART_MAIN) + 1, LV_PART_MAIN);
     ui_Container33 = lv_obj_create(ui_Container42);
@@ -327,6 +376,7 @@ void ui_music_screen_init(void)
     lv_obj_add_flag(ui_skip_forward, LV_OBJ_FLAG_CLICKABLE);     /// Flags
     lv_obj_remove_flag(ui_skip_forward, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
 
+    /* ================= PAGE 3 (右侧): 歌曲列表 ================= */
     ui_Container43 = lv_obj_create(ui_Container73);
     lv_obj_remove_style_all(ui_Container43);
     lv_obj_set_width(ui_Container43, lv_pct(100));
@@ -381,47 +431,19 @@ void ui_music_screen_init(void)
     lv_obj_set_height(ui_Container45, lv_pct(85));
     lv_obj_set_x(ui_Container45, lv_pct(0));
     lv_obj_set_y(ui_Container45, lv_pct(15));
-    lv_obj_remove_flag(ui_Container45, LV_OBJ_FLAG_CLICKABLE);      /// Flags
+    
+    // 列表垂直滑动并开启透传
+    lv_obj_set_scroll_dir(ui_Container45, LV_DIR_VER);
+    lv_obj_add_flag(ui_Container45, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_GESTURE_BUBBLE);
+    lv_obj_set_scrollbar_mode(ui_Container45, LV_SCROLLBAR_MODE_AUTO);
+    lv_obj_set_flex_flow(ui_Container45, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_flex_align(ui_Container45, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
 
-    ui_simpleitem2 = lv_obj_create(ui_Container45);
-    lv_obj_remove_style_all(ui_simpleitem2);
-    lv_obj_set_height(ui_simpleitem2, 50);
-    lv_obj_set_width(ui_simpleitem2, lv_pct(95));
-    lv_obj_set_align(ui_simpleitem2, LV_ALIGN_TOP_MID);
-    lv_obj_set_flex_flow(ui_simpleitem2, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(ui_simpleitem2, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_add_flag(ui_simpleitem2, LV_OBJ_FLAG_HIDDEN);     /// Flags
-    lv_obj_remove_flag(ui_simpleitem2, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_pad_left(ui_simpleitem2, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_simpleitem2, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_simpleitem2, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_simpleitem2, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_simpleitem2, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_PRESSED);
-    lv_obj_set_style_bg_opa(ui_simpleitem2, 20, LV_PART_MAIN | LV_STATE_PRESSED);
+    // 初始卡位居中放在播放控制器页
+    lv_obj_scroll_to_view(ui_Container42, LV_ANIM_OFF);
 
-    ui_Image12 = lv_image_create(ui_simpleitem2);
-    lv_image_set_src(ui_Image12, &ui_img_item_music_png);
-    lv_obj_set_width(ui_Image12, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Image12, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_Image12, LV_ALIGN_LEFT_MID);
-    lv_obj_add_flag(ui_Image12, LV_OBJ_FLAG_CLICKABLE);     /// Flags
-    lv_obj_remove_flag(ui_Image12, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-
-    ui_simple_item_text1 = lv_label_create(ui_simpleitem2);
-    lv_obj_set_height(ui_simple_item_text1, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_flex_grow(ui_simple_item_text1, 1);
-    lv_obj_set_x(ui_simple_item_text1, 32);
-    lv_obj_set_y(ui_simple_item_text1, 0);
-    lv_obj_set_align(ui_simple_item_text1, LV_ALIGN_LEFT_MID);
-    lv_label_set_long_mode(ui_simple_item_text1, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text(ui_simple_item_text1, "");
-    lv_obj_set_style_text_color(ui_simple_item_text1, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_simple_item_text1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_simple_item_text1, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui_simple_item_text1, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_simple_item_text1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_simple_item_text1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_simple_item_text1, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // 默认显示美化的“暂无歌词”
+    lrc_clear();
 
     lv_obj_add_event_cb(ui_music_seek, ui_event_music_seek, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_skip_back, ui_event_skip_back, LV_EVENT_ALL, NULL);
@@ -430,17 +452,21 @@ void ui_music_screen_init(void)
     lv_obj_add_event_cb(ui_skip_forward, ui_event_skip_forward, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_music_refresh, ui_event_music_refresh, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_music, ui_event_music, LV_EVENT_ALL, NULL);
-
 }
 
 void ui_music_screen_destroy(void)
 {
+    lrc_clear();
+
     if(ui_music) lv_obj_del(ui_music);
 
-    // NULL screen variables
     ui_music = NULL;
     ui_Container74 = NULL;
     ui_Container73 = NULL;
+
+    ui_Container_lrc = NULL;
+    ui_lrc_list = NULL;
+
     ui_Container42 = NULL;
     ui_musci_changpian = NULL;
     ui_music_info_label = NULL;
@@ -466,5 +492,186 @@ void ui_music_screen_destroy(void)
     ui_simpleitem2 = NULL;
     ui_Image12 = NULL;
     ui_simple_item_text1 = NULL;
+}
 
+/* ================= 歌词接口与逻辑函数 ================= */
+
+void lrc_clear(void)
+{
+    if (ui_lrc_list) {
+        lv_obj_clean(ui_lrc_list);
+    }
+    for (int i = 0; i < g_lrc_count; i++) {
+        if (g_lrc_lines[i].text) {
+            free(g_lrc_lines[i].text);
+            g_lrc_lines[i].text = NULL;
+        }
+        g_lrc_labels[i] = NULL;
+    }
+    g_lrc_count = 0;
+    g_current_index = -1;
+
+    // 清空时自动居中放置美化的“暂无歌词”
+    if (ui_lrc_list) {
+        lv_obj_t * empty_label = lv_label_create(ui_lrc_list);
+        lv_label_set_text(empty_label, "暂无歌词");
+        lv_obj_set_width(empty_label, lv_pct(100));
+        lv_obj_set_style_text_align(empty_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+        lv_obj_set_style_text_font(empty_label, &ui_font_simhei14, LV_PART_MAIN);
+        lv_obj_set_style_text_color(empty_label, lv_color_hex(0x888888), LV_PART_MAIN);
+        lv_obj_set_style_text_opa(empty_label, 150, LV_PART_MAIN);
+    }
+}
+
+static int compare_lrc(const void *a, const void *b)
+{
+    const lrc_line_t *la = (const lrc_line_t *)a;
+    const lrc_line_t *lb = (const lrc_line_t *)b;
+    return (la->time_ms > lb->time_ms) - (la->time_ms < lb->time_ms);
+}
+
+bool lrc_parse(const char *lrc_str)
+{
+    lrc_clear();
+    if (!lrc_str || !ui_lrc_list) return false;
+
+    const char *line = lrc_str;
+    while (*line && g_lrc_count < MAX_LRC_LINES) {
+        int m = 0, s = 0, ms = 0;
+        if (sscanf(line, "[%d:%d.%d]", &m, &s, &ms) == 3 || sscanf(line, "[%d:%d:%d]", &m, &s, &ms) == 3) {
+            const char *text_start = strchr(line, ']');
+            if (text_start) {
+                text_start++;
+                const char *next_line = strchr(line, '\n');
+                int len = next_line ? (next_line - text_start) : (int)strlen(text_start);
+
+                if (len > 0 && text_start[len - 1] == '\r') len--;
+
+                if (len > 0) {
+                    g_lrc_lines[g_lrc_count].time_ms = (m * 60 + s) * 1000 + ms * 10;
+                    g_lrc_lines[g_lrc_count].text = (char *)malloc(len + 1);
+                    if (g_lrc_lines[g_lrc_count].text) {
+                        strncpy(g_lrc_lines[g_lrc_count].text, text_start, len);
+                        g_lrc_lines[g_lrc_count].text[len] = '\0';
+                        g_lrc_count++;
+                    }
+                }
+            }
+        }
+        line = strchr(line, '\n');
+        if (!line) break;
+        line++;
+    }
+
+    if (g_lrc_count == 0) return false;
+
+    // 清除“暂无歌词”控件
+    lv_obj_clean(ui_lrc_list);
+
+    qsort(g_lrc_lines, g_lrc_count, sizeof(lrc_line_t), compare_lrc);
+
+    for (int i = 0; i < g_lrc_count; i++) {
+        g_lrc_labels[i] = lv_label_create(ui_lrc_list);
+        lv_label_set_text(g_lrc_labels[i], g_lrc_lines[i].text);
+        lv_obj_set_width(g_lrc_labels[i], lv_pct(90));
+        lv_obj_set_style_text_align(g_lrc_labels[i], LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+        lv_obj_set_style_text_font(g_lrc_labels[i], &ui_font_simhei14, LV_PART_MAIN);
+
+        // 普通行样式
+        lv_obj_set_style_text_color(g_lrc_labels[i], lv_color_hex(0x888888), LV_PART_MAIN);
+        lv_obj_set_style_text_opa(g_lrc_labels[i], 160, LV_PART_MAIN);
+    }
+
+    return true;
+}
+
+bool lrc_parse_file(const char *file_path)
+{
+    if (!file_path) return false;
+
+    FILE *f = fopen(file_path, "rb");
+    if (!f) {
+        lrc_clear();
+        return false;
+    }
+
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    if (size <= 0) {
+        fclose(f);
+        lrc_clear();
+        return false;
+    }
+
+    char *buf = (char *)malloc(size + 1);
+    if (!buf) {
+        fclose(f);
+        lrc_clear();
+        return false;
+    }
+
+    fread(buf, 1, size, f);
+    buf[size] = '\0';
+    fclose(f);
+
+    bool res = lrc_parse(buf);
+    free(buf);
+    return res;
+}
+
+// 自动把后缀名替换为 .lrc 并加载歌词
+bool lrc_parse_by_audio_path(const char *audio_path)
+{
+    if (!audio_path) return false;
+
+    size_t len = strlen(audio_path);
+    char *lrc_path = (char *)malloc(len + 5);
+    if (!lrc_path) return false;
+
+    strcpy(lrc_path, audio_path);
+
+    char *dot = strrchr(lrc_path, '.');
+    if (dot) {
+        strcpy(dot, ".lrc");
+    } else {
+        strcat(lrc_path, ".lrc");
+    }
+
+    bool result = lrc_parse_file(lrc_path);
+    free(lrc_path);
+    return result;
+}
+
+void lrc_update_time(uint32_t current_ms)
+{
+    if (g_lrc_count == 0 || !ui_lrc_list) return;
+
+    int active_idx = -1;
+    for (int i = 0; i < g_lrc_count; i++) {
+        if (current_ms >= g_lrc_lines[i].time_ms) {
+            active_idx = i;
+        } else {
+            break;
+        }
+    }
+
+    if (active_idx != g_current_index && active_idx >= 0) {
+        if (g_current_index >= 0 && g_current_index < g_lrc_count && g_lrc_labels[g_current_index]) {
+            lv_obj_set_style_text_color(g_lrc_labels[g_current_index], lv_color_hex(0x888888), LV_PART_MAIN);
+            lv_obj_set_style_text_opa(g_lrc_labels[g_current_index], 160, LV_PART_MAIN);
+        }
+
+        if (g_lrc_labels[active_idx]) {
+            // 高亮当前播放行
+            lv_obj_set_style_text_color(g_lrc_labels[active_idx], lv_color_hex(0xFFFFFF), LV_PART_MAIN);
+            lv_obj_set_style_text_opa(g_lrc_labels[active_idx], 255, LV_PART_MAIN);
+
+            // 精准垂直居中滚动
+            lv_obj_scroll_to_view(g_lrc_labels[active_idx], LV_ANIM_ON);
+        }
+
+        g_current_index = active_idx;
+    }
 }

@@ -213,7 +213,7 @@ void init_notification_panel()
     lv_obj_set_style_radius(ui_notification_panel_, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(ui_notification_panel_, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_notification_panel_, 220, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_blur_radius(ui_notification_panel_, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_set_style_blur_radius(ui_notification_panel_, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
     // lv_obj_set_style_blur_backdrop(ui_notification_panel_, true, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Container62_ = lv_obj_create(ui_notification_panel_);

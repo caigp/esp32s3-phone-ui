@@ -48,6 +48,7 @@ const lv_image_dsc_t ui_img_icon_chevron_right_png = {
   .header.magic = LV_IMAGE_HEADER_MAGIC,
   .header.w = 18,
   .header.h = 18,
+  .header.stride = 9,
   .data_size = 226,
   .data = ui_img_icon_chevron_right_png_map,
 };
