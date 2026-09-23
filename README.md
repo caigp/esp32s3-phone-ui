@@ -9,7 +9,7 @@ https://www.bilibili.com/video/BV1utey6aE6M/?share_source=copy_web&vd_source=c5b
 
 ## 截图展示
 
-![项目截图](Screenshot/IMG20260915064909.jpg)
+![项目截图](Screenshot/IMG20260923103417.jpg)
 
 ## 主要功能
 
@@ -56,7 +56,7 @@ https://www.bilibili.com/video/BV1utey6aE6M/?share_source=copy_web&vd_source=c5b
 | I2C SDA | GPIO 47 | I2C 数据线 |
 | Touch RST | GPIO 11 | 触摸复位 |
 
-### 2. 音频输出
+### 2. 音频模块
 
 #### 音频模块展示
 
@@ -64,11 +64,30 @@ https://www.bilibili.com/video/BV1utey6aE6M/?share_source=copy_web&vd_source=c5b
 
 *   **功放模块**: MAX98357 (I2S 接口)
 
-| 功能 | ESP32-S3 GPIO | 备注 |
+| 功能 | ESP32-S3 GPIO / 电源 | 备注 |
 | :--- | :---: | :--- |
-| BCLK | GPIO 21 | 位时钟 |
-| WS (LRC) | GPIO 14 | 字选择/左右声道 |
+| VDD | 3.3V | 电源正极 |
+| GND | GND | 接地 |
+| SD | VCC | 关断控制（接高电平使能） |
+| GAIN | VCC | 增益控制（接高电平选择增益） |
+| BCLK | GPIO 14 | 位时钟 |
+| WS (LRC) | GPIO 13 | 字选择/左右声道 |
 | DIN | GPIO 10 | 数据输入 |
+
+#### 麦克风模块展示
+
+![麦克风模块](Screenshot/tb_image_share_1790131281683.png)
+
+*   **麦克风模块**: INMP441 (I2S 接口)
+
+| 功能 | ESP32-S3 GPIO / 电源 | 备注 |
+| :--- | :---: | :--- |
+| VDD | 3.3V | 电源正极 |
+| GND | GND | 接地 |
+| L/R | GND | 左/右声道选择（接地为左声道） |
+| BCLK | GPIO 14 | 位时钟（与功放共用） |
+| WS (LRC) | GPIO 13 | 字选择（与功放共用） |
+| DOUT | GPIO 12 | 数据输出 |
 
 ### 3. TF 卡模块 (SD Card)
 *   **接口**: SPI
