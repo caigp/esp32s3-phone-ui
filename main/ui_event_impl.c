@@ -217,12 +217,14 @@ static void vGameScannTask(void *arg)
 
 void switch_ui_pause(void *data)
 {
-    lv_obj_remove_flag(ui_pause, LV_OBJ_FLAG_HIDDEN);
+    ESP_LOGI(TAG, "%s", __func__);
     lv_obj_add_flag(ui_play, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(ui_pause, LV_OBJ_FLAG_HIDDEN);
 }
 
 void switch_ui_play(void *data)
 {
+    ESP_LOGI(TAG, "%s", __func__);
     lv_obj_remove_flag(ui_play, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui_pause, LV_OBJ_FLAG_HIDDEN);
 }
@@ -306,12 +308,13 @@ static esp_player_err_t player_event_cb(esp_player_event_msg_t *msg, void *ctx)
     switch (msg->event_type) {
         case ESP_PLAYER_EVENT_PAUSED:
             lv_async_call(switch_ui_play, NULL);
+            lv_timer_pause(music_lv_timer);
             break;
         case ESP_PLAYER_EVENT_PLAYED:
+            lv_timer_resume(music_lv_timer);
             lv_async_call(switch_ui_pause, NULL);
             break;
         case ESP_PLAYER_EVENT_FINISHED:
-            lv_async_call(switch_ui_play, NULL);
             lv_async_call(next_play_music, NULL);
             break;
         case ESP_PLAYER_EVENT_ERROR:
@@ -324,7 +327,7 @@ static esp_player_err_t player_event_cb(esp_player_event_msg_t *msg, void *ctx)
             lv_async_call(duration_xcb, &duration);
             break;
         case ESP_PLAYER_EVENT_SEEK_DONE:
-            
+            lv_timer_resume(music_lv_timer);
             break;
         default:
             break;
@@ -562,6 +565,9 @@ void music_action(lv_event_t * e)
 
 void music_loaded(lv_event_t * e)
 {
+    music_lv_timer = lv_timer_create(refresh_play_info_cb, 1000, NULL);
+    lv_timer_pause(music_lv_timer);
+
     //获取当前播放器信息
     if (player != NULL)
     {
@@ -579,6 +585,7 @@ void music_loaded(lv_event_t * e)
         lv_slider_set_value(ui_music_seek, current_time / 1000, LV_ANIM_OFF);
         if (ESP_PLAYER_STATE_PLAYING == state) {
             switch_ui_pause(NULL);
+            lv_timer_resume(music_lv_timer);
         } else {
             switch_ui_play(NULL);
         }
@@ -588,8 +595,6 @@ void music_loaded(lv_event_t * e)
         player_init(&player);
         esp_player_set_event_cb(player, player_event_cb, NULL);
     }
-    
-    music_lv_timer = lv_timer_create(refresh_play_info_cb, 1000, NULL);
 
     if (handle == NULL)
     {
@@ -607,7 +612,6 @@ void music_seek_released(lv_event_t * e)
 {
     int v = lv_slider_get_value(ui_music_seek);
     esp_player_seek(player, v * 1000);
-    lv_timer_resume(music_lv_timer);
 }
 
 void music_seek_pressed(lv_event_t * e)
