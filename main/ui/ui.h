@@ -27,7 +27,7 @@ extern "C" {
 #include "screens/ui_calculator.h"
 #include "screens/ui_temp_RH.h"
 #include "screens/ui_health.h"
-#include "screens/ui_music.h"
+#include "screens/music/ui_music.h"
 #include "screens/ui_nes_game.h"
 #include "screens/ui_gaming.h"
 #include "screens/ui_file_manager.h"

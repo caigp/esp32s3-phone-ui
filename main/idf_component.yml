@@ -15,3 +15,4 @@ dependencies:
   espressif/rmaker_time_sync: ^1.0.2
   espressif/esp_coze: ^1.0.0
   espressif/esp-sr: ^2.5.3
+  espressif/esp_lcd_ili9341: '2.1.0'

@@ -27,6 +27,7 @@
 #include <nes_mmc.h>
 #include <nes.h>
 #include <libsnss.h>
+#include <string.h>
 
 static struct
 {
@@ -37,6 +38,38 @@ static struct
 static uint8 reg;
 static uint8 command;
 static uint16 vrombase;
+
+/* Waixing's 640 KiB Mapper 198 board decodes the first 80 8 KiB PRG
+ * pages directly.  Values past that physical range are decoded through
+ * the MMC3's six low bank bits; this is what makes R6=0x7C select page 60
+ * while the earlier R6=0x40 still selects page 64. */
+static int map4_prg_bank(uint8 value)
+{
+   int bank = value;
+
+   if (198 == mmc_getinfo()->mapper_number &&
+       bank >= (mmc_getinfo()->rom_banks * 2))
+   {
+      bank &= 0x3F;
+   }
+
+   return bank;
+}
+
+/* Nanjing/mapper-198 boards expose a small work RAM window at $5000-$5FFF
+ * in addition to the normal MMC3 registers.  Keep it separate from battery
+ * backed SRAM at $6000-$7FFF. */
+static uint8 map198_workram[0x1000];
+
+static uint8 map198_ram_read(uint32 address)
+{
+   return map198_workram[address & 0x0FFF];
+}
+
+static void map198_ram_write(uint32 address, uint8 value)
+{
+   map198_workram[address & 0x0FFF] = value;
+}
 
 /* mapper 4: MMC3 */
 static void map4_write(uint32 address, uint8 value)
@@ -89,11 +122,12 @@ static void map4_write(uint32 address, uint8 value)
          break;
 
       case 6:
-         mmc_bankrom(8, (command & 0x40) ? 0xC000 : 0x8000, value);
+         mmc_bankrom(8, (command & 0x40) ? 0xC000 : 0x8000,
+                     map4_prg_bank(value));
          break;
 
       case 7:
-         mmc_bankrom(8, 0xA000, value);
+         mmc_bankrom(8, 0xA000, map4_prg_bank(value));
          break;
       }
       break;
@@ -127,6 +161,11 @@ static void map4_write(uint32 address, uint8 value)
 
    case 0xE000:
       irq.enabled = false;
+      /* MMC3 deasserts its IRQ output when $E000 is written.  Clear the
+       * mapper source as well when the CPU had sampled the line while its
+       * I flag was set; otherwise the stale pending bit is serviced again
+       * immediately after RTI and can trap the game in its IRQ vector. */
+      nes6502_irq_clear(NES6502_IRQ_DEFAULT);
 //      if (irq.reset)
 //         irq.counter = irq.latch;
       break;
@@ -198,8 +237,37 @@ static void map4_init(void)
    vrombase = 0x0000;
 }
 
+static void map198_init(void)
+{
+   nes6502_context cpu;
+
+   map4_init();
+   memset(map198_workram, 0, sizeof(map198_workram));
+
+   /* The 6502 core fetches opcodes through its paged memory table instead of
+    * the general read-handler list.  This board executes a small bootstrap
+    * copied into $5000-$5FFF, so page 5 must point at the work RAM as well as
+    * retaining the explicit read/write handlers for data accesses. */
+   nes6502_getcontext(&cpu);
+   cpu.mem_page[5] = map198_workram;
+   nes6502_setcontext(&cpu);
+}
+
 static map_memwrite map4_memwrite[] =
 {
+   { 0x8000, 0xFFFF, map4_write },
+   {     -1,     -1, NULL }
+};
+
+static map_memread map198_memread[] =
+{
+   { 0x5000, 0x5FFF, map198_ram_read },
+   {     -1,     -1, NULL }
+};
+
+static map_memwrite map198_memwrite[] =
+{
+   { 0x5000, 0x5FFF, map198_ram_write },
    { 0x8000, 0xFFFF, map4_write },
    {     -1,     -1, NULL }
 };
@@ -216,6 +284,38 @@ mapintf_t map4_intf =
    NULL, /* memory read structure */
    map4_memwrite, /* memory write structure */
    NULL /* external sound device */
+};
+
+/* Mapper 74 is an MMC3-compatible pirate board used by several Chinese
+ * translations, including the supplied Metal Max image. */
+mapintf_t map74_intf =
+{
+   74,
+   "MMC3 compatible (Mapper 74)",
+   map4_init,
+   NULL,
+   map4_hblank,
+   map4_getstate,
+   map4_setstate,
+   NULL,
+   map4_memwrite,
+   NULL
+};
+
+/* Mapper 198 (Nanjing) uses MMC3-style PRG/CHR/IRQ registers with a 4 KiB
+ * work-RAM window at $5000-$5FFF. */
+mapintf_t map198_intf =
+{
+   198,
+   "Nanjing MMC3 compatible",
+   map198_init,
+   NULL,
+   map4_hblank,
+   map4_getstate,
+   map4_setstate,
+   map198_memread,
+   map198_memwrite,
+   NULL
 };
 
 /*

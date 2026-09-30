@@ -40,6 +40,7 @@
 // #include <spi_lcd.h>
 
 #include <psxcontroller.h>
+#include "esp_heap_caps.h"
 #include "esp_log.h"
 #include <test.h>
 #include "driver/gpio.h"
@@ -47,12 +48,13 @@
 static const char *TAG = "VIDEO AUDIO";
 
 #define  DEFAULT_SAMPLERATE   44100
-#define  DEFAULT_FRAGSIZE     128
+
 
 #define  DEFAULT_WIDTH        256
 #define  DEFAULT_HEIGHT       NES_VISIBLE_HEIGHT
 
 #define  REFRESH_RATE         60
+#define  AUDIO_FRAME_SAMPLES  (DEFAULT_SAMPLERATE / REFRESH_RATE)
 
 // 标准 64 色 NES RGB565 调色板 (标准 RGB565 格式)
 const uint16_t nes_palette_rgb565[64] = {
@@ -93,40 +95,22 @@ void osd_uninstalltimer()
 ** Audio
 */
 static void (*audio_callback)(void *buffer, int length) = NULL;
-#if CONFIG_SOUND_ENA
-QueueHandle_t queue;
+/* Audio is enabled by the runtime sound toggle in this board's UI. */
 static uint16_t *audio_frame;
-#endif
 
 FILE *f;
 void do_audio_frame() {
-    if (!sound)
+    if (!sound || audio_callback == NULL || audio_frame == NULL)
     {
         return;
     }
 
-#if CONFIG_SOUND_ENA
-	int left=DEFAULT_SAMPLERATE/REFRESH_RATE;
-	while(left) {
-		int n=DEFAULT_FRAGSIZE;
-		if (n>left) n=left;
-        
-        memset(audio_frame, 0, sizeof(audio_frame));
-		audio_callback(audio_frame, n); //get more data
-        // ESP_LOGI("", "audio len = %d", n);
-		//16 bit mono -> 32-bit (16 bit r+l)
-		// for (int i=n-1; i>=0; i--) {
-		// 	audio_frame[i*2+1]=audio_frame[i];
-		// 	audio_frame[i*2]=audio_frame[i];
-		// }
-		// i2s_write_bytes(0, audio_frame, 4*n, portMAX_DELAY);
-        nes_audio_callback(audio_frame, 2*n);
-        // fwrite(audio_frame, sizeof(uint16), 2 *n, f);
-        // fflush(f);
-        // printf("audio...");
-		left-=n;
-	}
-#endif
+    /* Generate and submit one complete NES frame of audio.  Splitting the
+     * same 735 samples into six ring-buffer writes adds avoidable mutex and
+     * wakeup overhead and can make the emulation task wait repeatedly when
+     * the mixer is busy. */
+    audio_callback(audio_frame, AUDIO_FRAME_SAMPLES);
+    nes_audio_callback(audio_frame, AUDIO_FRAME_SAMPLES * sizeof(*audio_frame));
 }
 
 void osd_setsound(void (*playfunc)(void *buffer, int length))
@@ -144,29 +128,7 @@ static void osd_stopsound(void)
 
 static int osd_init_sound(void)
 {
-#if CONFIG_SOUND_ENA
-	// audio_frame=malloc(4*DEFAULT_FRAGSIZE);
-	// i2s_config_t cfg={
-	// 	.mode=I2S_MODE_DAC_BUILT_IN|I2S_MODE_TX|I2S_MODE_MASTER,
-	// 	.sample_rate=DEFAULT_SAMPLERATE,
-	// 	.bits_per_sample=I2S_BITS_PER_SAMPLE_16BIT,
-	// 	.channel_format=I2S_CHANNEL_FMT_RIGHT_LEFT,
-	// 	.communication_format=I2S_COMM_FORMAT_I2S_MSB,
-	// 	.intr_alloc_flags=0,
-	// 	.dma_buf_count=4,
-	// 	.dma_buf_len=512
-	// };
-	// i2s_driver_install(0, &cfg, 4, &queue);
-	// i2s_set_pin(0, NULL);
-	// i2s_set_dac_mode(I2S_DAC_CHANNEL_LEFT_EN); 
-
-	// //I2S enables *both* DAC channels; we only need DAC1.
-	// //ToDo: still needed now I2S supports set_dac_mode?
-	// CLEAR_PERI_REG_MASK(RTC_IO_PAD_DAC1_REG, RTC_IO_PDAC1_DAC_XPD_FORCE_M);
-	// CLEAR_PERI_REG_MASK(RTC_IO_PAD_DAC1_REG, RTC_IO_PDAC1_XPD_DAC_M);
-
-#endif
-    audio_frame=malloc(4*DEFAULT_FRAGSIZE);
+	audio_frame=malloc(AUDIO_FRAME_SAMPLES * sizeof(*audio_frame));
 	audio_callback = NULL;
 
     nes_audio_init();
@@ -213,6 +175,9 @@ viddriver_t sdlDriver =
 
 bitmap_t *myBitmap;
 
+/* LVGL reads the published buffer while the NES task fills the other one. */
+static uint16_t *rgb565;
+
 void osd_getvideoinfo(vidinfo_t *info)
 {
    info->default_width = NES_SCREEN_WIDTH;
@@ -228,18 +193,22 @@ void osd_togglefullscreen(int code)
 /* initialise video */
 static int init(int width, int height)
 {
+    rgb565 = (uint16_t *)heap_caps_malloc(width * height * sizeof(uint16_t), MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    memset(rgb565, 0, sizeof(uint16_t) * width * height);
 	return 0;
 }
 
 static void shutdown(void)
 {
-
+    /* Wait for LVGL rendering and detach its source before freeing pixels. */
+    nes_video_deinit();
+    heap_caps_free(rgb565);
 }
 
 /* set a video mode */
 static int set_mode(int width, int height,  int pitch)
 {
-    nes_img_set(pitch, height);
+    nes_img_set(width, height);
     return 0;
 }
 
@@ -302,33 +271,23 @@ static void free_write(int num_dirties, rect_t *dirty_rects)
 
 }
 
-// RGB565 framebuffer（用于显示）
-static uint16_t *rgb565_fb = NULL;
-
 static void custom_blit(bitmap_t *bmp, int num_dirties, rect_t *dirty_rects) {
-    if (!bmp || !bmp->data) {
-        return;
-    }
 
-    // 1. 延迟分配 RGB565 缓冲区 (放在 PSRAM)
-    if (rgb565_fb == NULL) {
-        rgb565_fb = heap_caps_calloc(1, bmp->pitch * bmp->height * 2, MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA);
-        if (!rgb565_fb) {
-            return;
+    int w = bmp->width;
+    int h = bmp->height;
+    for (size_t i = 0; i < h; i++)
+    {
+        uint8_t *buf = bmp->line[i];
+
+        for (size_t j = 0; j < w; j++) {
+            rgb565[i * w + j] = myPalette[buf[j]];
+
+            // rgb565[i * 272 + j] = myPalette[src[i * 272 + j]];
+
         }
     }
 
-    // 2. 转换颜色: 8-bit index -> RGB565
-    uint8_t *src = bmp->data;
-    int pixel_count = bmp->pitch * bmp->height;
-    
-    for (int i = 0; i < pixel_count; i++) {
-        rgb565_fb[i] = myPalette[src[i]];
-        // rgb565_fb[i] = 0x8410;
-    }
-
-    // 3. 直接调用 LVGL 更新函数
-    nes_video_callback(rgb565_fb);
+    nes_video_callback(rgb565);
 }
 
 /*

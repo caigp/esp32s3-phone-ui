@@ -56,7 +56,7 @@ static void touch_init()
         //     .interrupt = 0,
         // },
         // .flags = {
-        //     .swap_xy = 0,
+        //     .swap_xy = 1,
         //     .mirror_x = 0,
         //     .mirror_y = 0,
         // },
@@ -68,6 +68,9 @@ static void touch_init()
     esp_lcd_panel_io_tx_param(tp_io_handle, 0x80, (uint8_t[]) {0x30}, 1);
     /* peak阈值 */
     esp_lcd_panel_io_tx_param(tp_io_handle, 0x81, (uint8_t[]) {0x08}, 1);
+
+    esp_lcd_panel_io_tx_param(tp_io_handle, 0x88, (uint8_t[]) {0x10}, 1);
+    esp_lcd_panel_io_tx_param(tp_io_handle, 0x89, (uint8_t[]) {0x10}, 1);
 }
 
 
@@ -113,44 +116,24 @@ static void lcd_init()
         .rgb_ele_order = LCD_RGB_ELEMENT_ORDER_BGR,
         .bits_per_pixel = 16,
     };
-    ESP_LOGI(TAG, "Install ST7789 panel driver");
-    ESP_ERROR_CHECK(esp_lcd_new_panel_st7789(io_handle, &panel_config, &panel_handle));
+    ESP_LOGI(TAG, "Install ILI9341 panel driver");
+    ESP_LOGI(TAG, "LCD SPI requested clock: %u Hz", (unsigned)LCD_PIXEL_CLOCK_HZ);
+    ESP_ERROR_CHECK(esp_lcd_new_panel_ili9341(io_handle, &panel_config, &panel_handle));
     ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
     ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
-    ESP_ERROR_CHECK(esp_lcd_panel_mirror(panel_handle, true, false));
+
+    // uint8_t madctl_landscape = 0x28; 
+    // ESP_ERROR_CHECK(esp_lcd_panel_io_tx_param(io_handle, 0x36, &madctl_landscape, 1));
+    // ESP_ERROR_CHECK(esp_lcd_panel_mirror(panel_handle, true, false));
 
     // user can flush pre-defined pattern to the screen before we turn on the screen or backlight
     ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
 
-    // 0x20: Display Inversion OFF (关闭硬件反色)
-    // 0x21: Display Inversion ON  (开启硬件反色)
-    esp_lcd_panel_io_tx_param(io_handle, 0x21, NULL, 0);
-    // 0x55 表示 16 bits/pixel (RGB565)
-    // esp_lcd_panel_io_tx_param(io_handle, 0x3A, (uint8_t[]){ 0x55 }, 1);
-
-    // 0x55 表示 MCU 接口和 RGB 接口均使用 16-bit/pixel (RGB565)
-    // uint8_t pixel_format = 0x55;
-    // esp_lcd_panel_io_tx_param(io_handle, 0x3A, &pixel_format, 1);
-
-    // // 发送 Gamma Curve Set 指令 (0x26)，选择默认 Gamma 曲线 1
-    // uint8_t gamma_curve = 0x01;// 可尝试 0x01, 0x02, 0x04, 0x08
-    // esp_lcd_panel_io_tx_param(io_handle, 0x26, &gamma_curve, 1);
-
-    // // 降低 VCOM 电压，通常能让“发白”的画面变沉稳、黑色更纯粹
-    // // 参数范围一般在 0x00 ~ 0x7F 之间，可以尝试在 0x1A 到 0x3E 之间微调
-    // uint8_t vcom_setting[] = { 0x2B, 0x2B }; // 默认值通常在 0x3E 左右，适当调小该值
-    // esp_lcd_panel_io_tx_param(io_handle, 0xC5, vcom_setting, 2);
-
-    // // 1. 开启正常显示模式 (Normal Display Mode On)
-    // esp_lcd_panel_io_tx_param(io_handle, 0x13, NULL, 0);
-
-    // // 2. 配置 Frame Rate 控制 (0xB1)，降低或升高刷新率有时能改善泛白
-    // // 默认为 0x00, 0x1B (约 70Hz)
-    // uint8_t frame_rate[] = { 0x00, 0x18 }; 
-    // esp_lcd_panel_io_tx_param(io_handle, 0xB1, frame_rate, 2);
-
-    // esp_lcd_panel_invert_color(panel_handle, true);
+    // Keep the existing panel inversion setting after vendor initialization.
+    ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_handle, true));
     // lcd_fill_red(panel_handle);
+
+    // esp_lcd_panel_io_tx_param(io_handle, 0x36, (uint8_t[]) { 0x28 }, 1);
 }
 
 static void sd_test_rw()

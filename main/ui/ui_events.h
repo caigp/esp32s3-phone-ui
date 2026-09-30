@@ -14,13 +14,7 @@ void bootinit(lv_event_t * e);
 void volume_change(lv_event_t * e);
 void temp_RH_load(lv_event_t * e);
 void temp_RH_unload(lv_event_t * e);
-void music_loaded(lv_event_t * e);
-void music_unloaded(lv_event_t * e);
-void music_seek_released(lv_event_t * e);
-void music_seek_pressed(lv_event_t * e);
-void music_seek_value_changed(lv_event_t * e);
-void music_action(lv_event_t * e);
-void music_list_refresh(lv_event_t * e);
+
 void game_loaded(lv_event_t * e);
 void game_list_refresh(lv_event_t * e);
 void gaming_paused(lv_event_t * e);

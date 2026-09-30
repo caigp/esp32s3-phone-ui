@@ -26,6 +26,7 @@
 /* TODO: make this a generic ROM loading routine */
 
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <noftypes.h>
 #include <nes_rom.h>
@@ -37,7 +38,6 @@
 #include <log.h>
 #include <osd.h>
 #include "esp_heap_caps.h"
-#include "esp_log.h"
 
 extern char *osd_getromdata(const char *filename);
 
@@ -92,18 +92,26 @@ static void rom_savesram(rominfo_t *rominfo)
 
    ASSERT(rominfo);
 
-   if (rominfo->flags & ROM_FLAG_BATTERY)
+   if ((rominfo->flags & ROM_FLAG_BATTERY) && rominfo->sram &&
+       rominfo->filename[0])
    {
-      strncpy(fn, rominfo->filename, PATH_MAX);
-      osd_newextension(fn, ".sav");
+      osd_fullname(fn, rominfo->filename);
+      if (NULL == osd_newextension(fn, ".sav"))
+         return;
 
       fp = fopen(fn, "wb");
       if (NULL != fp)
       {
-         fwrite(rominfo->sram, SRAM_BANK_LENGTH, rominfo->sram_banks, fp);
-         fclose(fp);
-         log_printf("Wrote battery RAM to %s.\n", fn);
+         size_t expected = SRAM_BANK_LENGTH * rominfo->sram_banks;
+         size_t written = fwrite(rominfo->sram, 1, expected, fp);
+         int close_result = fclose(fp);
+         if (written != expected || close_result != 0)
+            log_printf("Failed to write battery RAM to %s\n", fn);
+         else
+            log_printf("Wrote battery RAM to %s (%u bytes)\n", fn, (unsigned)written);
       }
+      else
+         log_printf("Cannot open save %s: %s\n", fn, strerror(errno));
    }
 }
 
@@ -117,16 +125,25 @@ static void rom_loadsram(rominfo_t *rominfo)
 
    if (rominfo->flags & ROM_FLAG_BATTERY)
    {
-      strncpy(fn, rominfo->filename, PATH_MAX);
-      osd_newextension(fn, ".sav");
+      osd_fullname(fn, rominfo->filename);
+      if (NULL == osd_newextension(fn, ".sav"))
+         return;
 
       fp = fopen(fn, "rb");
       if (NULL != fp)
       {
-         fread(rominfo->sram, SRAM_BANK_LENGTH, rominfo->sram_banks, fp);
+         size_t expected = SRAM_BANK_LENGTH * rominfo->sram_banks;
+         size_t loaded = fread(rominfo->sram, 1, expected, fp);
+         int read_failed = ferror(fp);
          fclose(fp);
-         log_printf("Read battery RAM from %s.\n", fn);
+         if (loaded != expected || read_failed)
+            log_printf("Incomplete battery RAM in %s (%u/%u bytes)\n",
+                     fn, (unsigned)loaded, (unsigned)expected);
+         else
+            log_printf("Read battery RAM from %s (%u bytes)\n", fn, (unsigned)loaded);
       }
+      else if (errno != ENOENT)
+         log_printf("Cannot read save %s: %s\n", fn, strerror(errno));
    }
 }
 
@@ -338,15 +355,13 @@ static int rom_getheader(unsigned char **rom, rominfo_t *rominfo)
 
    /* Read in the header */
 //   _fread(&head, 1, sizeof(head), fp);
-	printf("Head: %p (%x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x)\n",
+	log_printf("Head: %p (%x %x %x %x %x %x %x %x %x %x %x %x %x %x %x %x)\n",
          *rom, (*rom)[0], (*rom)[1], (*rom)[2], (*rom)[3], 
          (*rom)[4], (*rom)[5], (*rom)[6], (*rom)[7],
          (*rom)[8], (*rom)[9], (*rom)[10], (*rom)[11],
          (*rom)[12], (*rom)[13], (*rom)[14], (*rom)[15]);
-   // ESP_LOGI("NES", "*rom = %p", *rom);
 	memcpy(&head, *rom, sizeof(head));
 	*rom+=sizeof(head);
-   // ESP_LOGI("NES", "*rom = %p", *rom);
    if (memcmp(head.ines_magic, ROM_INES_MAGIC, 4))
    {
       gui_sendmsg(GUI_RED, "%s is not a valid ROM image", rominfo->filename);
@@ -391,6 +406,17 @@ static int rom_getheader(unsigned char **rom, rominfo_t *rominfo)
       }
 
       rom_adddirty(rominfo->filename);
+   }
+
+   /* The Chinese Tenchi o Kurau II dump uses a mapper-4 header even though
+    * its Nanjing board exposes the extra $5000-$5FFF work-RAM window used by
+    * mapper 198.  Its distinctive 640 KiB PRG / CHR-RAM layout lets us select
+    * the compatible mapper implementation before mmc_create() is called. */
+   if (4 == rominfo->mapper_number &&
+       0x28 == rominfo->rom_banks && 0 == rominfo->vrom_banks)
+   {
+      log_printf("Mapper 4 640 KiB CHR-RAM image: using Nanjing mapper 198\n");
+      rominfo->mapper_number = 198;
    }
 
    /* TODO: this is an ugly hack, but necessary, I guess */
@@ -445,13 +471,23 @@ char *rom_getinfo(rominfo_t *rominfo)
 /* Load a ROM image into memory */
 rominfo_t *rom_load(const char *filename)
 {
+   /* Leave room for a save extension even on extensionless ROM paths. */
+   if (NULL == filename || !filename[0] || strlen(filename) > PATH_MAX - 4)
+      return NULL;
+
    log_printf("filename = %s", filename);
    unsigned char *rom=(unsigned char*)osd_getromdata(filename);
    rominfo_t *rominfo;
 
+   if (NULL == rom)
+      return NULL;
+
    rominfo = heap_caps_malloc(sizeof(rominfo_t), MALLOC_CAP_SPIRAM);
    if (NULL == rominfo)
+   {
+      heap_caps_free(rom);
       return NULL;
+   }
 
    memset(rominfo, 0, sizeof(rominfo_t));
 
@@ -478,6 +514,8 @@ rominfo_t *rom_load(const char *filename)
 	if (rom_loadrom(&rom, rominfo))
       goto _fail;
 
+   /* Set only after loading succeeds: failure cleanup must not overwrite saves. */
+   osd_fullname(rominfo->filename, filename);
    rom_loadsram(rominfo);
 
    /* See if there's a palette we can load up */
@@ -495,7 +533,7 @@ _fail:
 /* Free a ROM */
 void rom_free(rominfo_t **rominfo)
 {
-   ESP_LOGI("NES", "%s", __func__);
+   log_printf("%s", __func__);
    if (NULL == *rominfo)
    {
       gui_sendmsg(GUI_GREEN, "ROM not loaded");
@@ -526,14 +564,14 @@ void rom_free(rominfo_t **rominfo)
       
    if ((*rominfo)->vram)
    {
-      ESP_LOGI("NES", "%s (*rominfo)->vram = %p", __func__, (*rominfo)->vram);
+      log_printf("%s (*rominfo)->vram = %p", __func__, (*rominfo)->vram);
       heap_caps_free((*rominfo)->vram);
    }
       
 
    heap_caps_free(*rominfo);
 
-   ESP_LOGI("NES", "ROM freed");
+   log_printf("ROM freed");
    gui_sendmsg(GUI_GREEN, "ROM freed");
 }
 

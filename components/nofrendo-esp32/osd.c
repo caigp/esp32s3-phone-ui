@@ -43,27 +43,32 @@ int osd_main(int argc, char *argv[])
 void osd_fullname(char *fullname, const char *shortname)
 {
    strncpy(fullname, shortname, PATH_MAX);
+   fullname[PATH_MAX] = '\0';
 }
 
 /* This gives filenames for storage of saves */
 char *osd_newextension(char *string, char *ext)
 {
-   char *dot;
+   char *dot, *basename;
+   size_t stem_length, ext_length;
 
    /* 如果字符串为空，直接返回 */
    if (!string || !ext)
       return string;
 
-   /* 找到最后一个 '.' */
-   dot = strrchr(string, '.');
+   /* Only replace the file's extension, not a dot in its directory. */
+   basename = strrchr(string, '/');
+   basename = basename ? basename + 1 : string;
+   dot = strrchr(basename, '.');
+   stem_length = dot ? (size_t)(dot - string) : strlen(string);
+   if (*ext == '.')
+      ext++;
+   ext_length = strlen(ext);
+   if (stem_length + 1 + ext_length > PATH_MAX)
+      return NULL;
 
-   /* 如果有 '.'，从那里截断 */
-   if (dot)
-      *dot = '\0';
-
-   /* 追加 '.' 和新扩展名 */
-   strcat(string, ".");
-   strcat(string, ext);
+   string[stem_length] = '.';
+   memcpy(string + stem_length + 1, ext, ext_length + 1);
 
    return string;
 }

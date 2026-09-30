@@ -2436,6 +2436,16 @@ void nes6502_nmi(void)
 /* Interrupt request */
 void nes6502_irq(void)
 {
+   nes6502_irq_source(NES6502_IRQ_DEFAULT);
+}
+
+void nes6502_irq_clear(uint8 source)
+{
+   cpu.int_pending &= (uint8) ~source;
+}
+
+void nes6502_irq_source(uint8 source)
+{
    DECLARE_LOCAL_REGS
 
    if (false == cpu.jammed)
@@ -2448,7 +2458,7 @@ void nes6502_irq(void)
       }
       else
       {
-         cpu.int_pending = 1;
+         cpu.int_pending |= source;
       }
       STORE_LOCAL_REGS();
    }

@@ -61,6 +61,10 @@
 #define  NMI_MASK       0x01
 #define  IRQ_MASK       0x02
 
+/* Pending IRQ sources may be acknowledged independently. */
+#define  NES6502_IRQ_DEFAULT    0x01  /* mapper / DMC */
+#define  NES6502_IRQ_FRAME      0x02  /* APU frame counter */
+
 /* Stack is located on 6502 page 1 */
 #define  STACK_OFFSET   0x0100
 
@@ -90,7 +94,7 @@ typedef struct
 
    uint8 jammed;  /* is processor jammed? */
    
-   uint8 int_pending, int_latency;
+   uint8 int_pending, int_latency; /* int_pending is an IRQ source bitmask */
 
    int32 total_cycles, burn_cycles;
 } nes6502_context;
@@ -104,6 +108,8 @@ extern void nes6502_reset(void);
 extern int nes6502_execute(int total_cycles);
 extern void nes6502_nmi(void);
 extern void nes6502_irq(void);
+extern void nes6502_irq_source(uint8 source);
+extern void nes6502_irq_clear(uint8 source);
 extern uint8 nes6502_getbyte(uint32 address);
 extern uint32 nes6502_getcycles(bool reset_flag);
 extern void nes6502_burn(int cycles);

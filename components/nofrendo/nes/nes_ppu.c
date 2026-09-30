@@ -369,13 +369,13 @@ uint8 ppu_read(uint32 address)
       value = ppu.latch = ppu.vdata_latch;
 
       /* VRAM only accessible during VBL */
-/*       if ((ppu.bg_on || ppu.obj_on) && !ppu.vram_accessible)
+      if ((ppu.bg_on || ppu.obj_on) && !ppu.vram_accessible)
       {
          ppu.vdata_latch = 0xFF;
          log_printf("VRAM read at $%04X, scanline %d\n", 
                     ppu.vaddr, nes_getcontextptr()->scanline);
       }
-      else */
+      else
       {
          uint32 addr = ppu.vaddr;
          if (addr >= 0x3000)
@@ -707,7 +707,6 @@ static void ppu_renderbg(uint8 *vidbuf)
       memset(vidbuf, FULLBG, NES_SCREEN_WIDTH);
       return;
    }
-
    bmp_ptr = vidbuf - ppu.tile_xofs; /* scroll x */
    refresh_vaddr = 0x2000 + (ppu.vaddr & 0x0FE0); /* mask out x tile */
    x_tile = ppu.vaddr & 0x1F;
@@ -882,7 +881,7 @@ static void ppu_renderoam(uint8 *vidbuf, int scanline)
       if (++spritecount == PPU_MAXSPRITE)
       {
          ppu.stat |= PPU_STATF_MAXSPRITE;
-         // break;
+         break;
       }
    }
 

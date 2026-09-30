@@ -25,18 +25,24 @@ static void button_event_cb(void *arg, void *data)
             {
             case GPIO_NUM_3:
                 {
-                    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-                    int32_t command = VOLUME_UP;
+                    if (xGlobalsQueue)
+                    {
+                        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+                        int32_t command = VOLUME_UP;
             
-                    xQueueSendFromISR(xGlobalsQueue, &command, &xHigherPriorityTaskWoken);
+                        xQueueSendFromISR(xGlobalsQueue, &command, &xHigherPriorityTaskWoken);
+                    }
                 }
                 break;
             case GPIO_NUM_46:
                 {
-                    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-                    int32_t command = VOLUME_DOWM;
+                    if (xGlobalsQueue)
+                    {
+                        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+                        int32_t command = VOLUME_DOWM;
             
-                    xQueueSendFromISR(xGlobalsQueue, &command, &xHigherPriorityTaskWoken);
+                        xQueueSendFromISR(xGlobalsQueue, &command, &xHigherPriorityTaskWoken);
+                    }
                 }
                 break;
             default:

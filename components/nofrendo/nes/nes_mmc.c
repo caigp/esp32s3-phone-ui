@@ -72,8 +72,49 @@ void mmc_getcontext(mmc_t *dest_mmc)
 /* VROM bankswitching */
 void mmc_bankvrom(int size, uint32 address, int bank)
 {
+   /*
+    * MMC3 cartridges are also commonly built with CHR-RAM rather than
+    * CHR-ROM (the supplied Chinese translation of Tenchi o Kurau II is
+    * one such image).  The old early return left the initial 8 KB VRAM
+    * mapping in place and silently ignored every $8001 CHR bank write.
+    * That produces a blank/corrupt picture as soon as the game uploads
+    * a new tile set.  Treat the 8 KB VRAM as eight 1 KB banks, mirroring
+    * the CHR-ROM path below.
+    */
    if (0 == mmc.cart->vrom_banks)
+   {
+      uint8 *vram = mmc.cart->vram;
+
+      if (NULL == vram)
+         return;
+
+      switch (size)
+      {
+      case 1:
+         ppu_setpage(1, address >> 10,
+                     &vram[(bank % 8) << 10] - address);
+         break;
+
+      case 2:
+         ppu_setpage(2, address >> 10,
+                     &vram[(bank % 4) << 11] - address);
+         break;
+
+      case 4:
+         ppu_setpage(4, address >> 10,
+                     &vram[(bank % 2) << 12] - address);
+         break;
+
+      case 8:
+         ppu_setpage(8, 0, vram);
+         break;
+
+      default:
+         log_printf("invalid VRAM bank size %d\n", size);
+         break;
+      }
       return;
+   }
 
    switch (size)
    {

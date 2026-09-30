@@ -7,7 +7,8 @@
 #define LCD_H_RES               240
 #define LCD_V_RES               320
 #define LCD_BIT_PER_PIXEL       (16)
-#define LCD_PIXEL_CLOCK_HZ      (40 * 1000 * 1000)
+/* Request the stable 60 MHz setting; ESP32-S3 SPI may quantize it to 40 MHz. */
+#define LCD_PIXEL_CLOCK_HZ      (60 * 1000 * 1000)
 
 
 #define PIN_NUM_SCLK    40

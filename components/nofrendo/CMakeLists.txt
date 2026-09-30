@@ -16,6 +16,10 @@ idf_component_register(
 
 target_compile_options(${COMPONENT_LIB} PRIVATE
     -std=gnu17
+    # The emulator runs a complete 262-scanline frame on every tick.  Keep
+    # this component optimized even when the application uses IDF's debug
+    # optimization level; the video/audio path is timing-sensitive.
+    -O2
     -w
     -DNOFRENDO_DEBUG
 )

@@ -67,7 +67,7 @@
 #define  OAMF_BEHIND          0x20
 
 /* Maximum number of sprites per horizontal scanline */
-#define  PPU_MAXSPRITE        8
+#define  PPU_MAXSPRITE        16
 
 /* some mappers do *dumb* things */
 typedef void (*ppulatchfunc_t)(uint32 address, uint8 value);

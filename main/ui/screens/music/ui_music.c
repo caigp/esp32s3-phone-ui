@@ -3,7 +3,8 @@
 // LVGL version: 9.1.0
 // Project name: xiaocaiUI
 
-#include "../ui.h"
+#include "../../ui.h"
+#include "music_event.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -10,7 +10,7 @@
 #include "esp_lcd_panel_io.h"
 #include "esp_lcd_panel_vendor.h"
 #include "esp_lcd_panel_ops.h"
-#include "esp_lcd_panel_st7789.h"
+#include "esp_lcd_ili9341.h"
 #include "driver/i2c_master.h"
 #include "esp_vfs_fat.h"
 #include "driver/sdspi_host.h"
@@ -36,7 +36,7 @@
 extern "C" {
 #endif
 
-#define LVGL_DRAW_BUF_LINES             (80)
+#define LVGL_DRAW_BUF_LINES             (120)
 
 #define SAMPLE_RATE             (44100)
 #define SLOT_BITS               I2S_DATA_BIT_WIDTH_16BIT

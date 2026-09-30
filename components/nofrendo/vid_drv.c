@@ -348,7 +348,7 @@ void vid_flush(void)
    }
    else
    {
-      //num_dirties = calc_dirties(dirty_rects);
+      // num_dirties = calc_dirties(dirty_rects);
       num_dirties = -1;
    }
 
@@ -381,7 +381,7 @@ int vid_setmode(int width, int height)
    }
    /* Create our backbuffer */
 #if 0
-   back_buffer = bmp_create(width, height, 0); /* no overdraw */
+   back_buffer = bmp_create(width, height, 8); /* no overdraw */
    if (NULL == back_buffer)
    {
       bmp_destroy(&primary_buffer);

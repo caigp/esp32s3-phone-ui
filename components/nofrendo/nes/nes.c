@@ -265,6 +265,7 @@ static uint8 nes_clearfiq(void)
    if (nes.fiq_occurred)
    {
       nes.fiq_occurred = false;
+      nes6502_irq_clear(NES6502_IRQ_FRAME);
       return 0x40;
    }
 
@@ -275,6 +276,12 @@ void nes_setfiq(uint8 value)
 {
    nes.fiq_state = value;
    nes.fiq_cycles = (int) NES_FIQ_PERIOD;
+   /* $4017 bit 6 acknowledges an already pending frame IRQ as well. */
+   if (value & 0x40)
+   {
+      nes.fiq_occurred = false;
+      nes6502_irq_clear(NES6502_IRQ_FRAME);
+   }
 }
 
 static void nes_checkfiq(int cycles)
@@ -286,7 +293,7 @@ static void nes_checkfiq(int cycles)
       if (0 == (nes.fiq_state & 0xC0))
       {
          nes.fiq_occurred = true;
-         nes6502_irq();
+         nes6502_irq_source(NES6502_IRQ_FRAME);
       }
    }
 }

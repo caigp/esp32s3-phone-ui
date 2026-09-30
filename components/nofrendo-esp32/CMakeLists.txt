@@ -11,5 +11,7 @@ idf_component_register(
 
 target_compile_options(${COMPONENT_LIB} PRIVATE
     -std=gnu17
+    # Palette conversion and audio framing run once per emulated frame.
+    -O2
     -w
 )
