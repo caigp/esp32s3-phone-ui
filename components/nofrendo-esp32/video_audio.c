@@ -68,7 +68,8 @@ const uint16_t nes_palette_rgb565[64] = {
     0xE68E, 0xBEEF, 0x9F73, 0x9F7B, 0x073B, 0x0000, 0x0000, 0x0000
 };
 
-TimerHandle_t timer;
+// TimerHandle_t timer;
+static bool init_input = false;
 
 volatile short key_board = 0xff;
 static bool sound = true;
@@ -76,19 +77,19 @@ static bool sound = true;
 //Seemingly, this will be called only once. Should call func with a freq of frequency,
 int osd_installtimer(int frequency, void *func, int funcsize, void *counter, int countersize)
 {
-	printf("Timer install, freq=%d\n", frequency);
-	timer=xTimerCreate("nes",pdMS_TO_TICKS(1000 / frequency), pdTRUE, NULL, func);
-	xTimerStart(timer, 0);
+	// printf("Timer install, freq=%d\n", frequency);
+	// timer=xTimerCreate("nes",pdMS_TO_TICKS(1000 / frequency), pdTRUE, NULL, func);
+	// xTimerStart(timer, 0);
    return 0;
 }
 
 void osd_uninstalltimer()
 {
-    if (timer !=NULL)
-    {
-        xTimerDelete(timer, 0);
-        timer = NULL;
-    }
+    // if (timer !=NULL)
+    // {
+    //     xTimerDelete(timer, 0);
+    //     timer = NULL;
+    // }
 }
 
 /*
@@ -297,6 +298,7 @@ static void custom_blit(bitmap_t *bmp, int num_dirties, rect_t *dirty_rects) {
 static void osd_initinput()
 {
 	// psxcontrollerInit();
+    init_input = true;
 }
 
 void osd_getinput(void)
@@ -352,7 +354,7 @@ bool nes_key_set(int num, int action)
     // ESP_LOGI(TAG, "v = %d", v);
     if (v != 0 && v != 1)
     {
-        return timer != NULL;
+        return init_input;
     }
     
     switch (num)
@@ -387,11 +389,12 @@ bool nes_key_set(int num, int action)
 
     // ESP_LOGI(TAG, "func = %s, key_board = %d", __func__, key_board);
 
-    return timer != NULL;
+    return init_input;
 }
 
 static void osd_freeinput(void)
 {
+    init_input = false;
 }
 
 void osd_getmouse(int *x, int *y, int *button)

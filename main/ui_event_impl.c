@@ -383,7 +383,6 @@ static void nes_lvgl_update_cb(void *data) {
     
     // 刷新图像
     lv_img_set_src(ui_game_video, &nes_img_dsc);
-    lv_obj_invalidate(ui_game_video);
 }
 
 // NES 视频回调 (在 Core 1 被调用)
@@ -484,7 +483,6 @@ void nes_video_deinit()
     ui_lock();
     if (ui_game_video) {
         lv_img_set_src(ui_game_video, NULL);
-        lv_obj_invalidate(ui_game_video);
     }
     nes_img_dsc.data = NULL;
     ui_unlock();
