@@ -4,17 +4,66 @@
 // Project name: xiaocaiUI
 
 #include "../ui.h"
+#include <time.h>
+#include <stdio.h>
+#include <string.h>
 
 lv_obj_t * ui_calendar = NULL;
-lv_obj_t * ui_Container75 = NULL;
 lv_obj_t * ui_Calendar_widget = NULL;
+
+static void update_calendar(void)
+{ 
+    time_t now;
+    time(&now);
+
+    struct tm timeinfo;
+    localtime_r(&now, &timeinfo);
+
+    uint32_t year = timeinfo.tm_year + 1900;
+    uint32_t month = timeinfo.tm_mon + 1;
+    uint32_t day = timeinfo.tm_mday;
+
+    if (year < 2026)
+    {
+        year = 2026;
+    }
+
+    static char years_buf[256];
+    years_buf[0] = '\0';
+    
+    int start_year = year - 2;
+    int end_year = year + 2;
+    
+    for(int y = end_year; y >= start_year; y--) {
+        char year_str[16];
+        /* 最后一个年份后面不加 \n */
+        snprintf(year_str, sizeof(year_str), (y == start_year) ? "%d" : "%d\n", y);
+        strcat(years_buf, year_str);
+    }
+    lv_calendar_header_dropdown_set_year_list(ui_Calendar_widget, years_buf);
+
+    lv_calendar_set_today_date(ui_Calendar_widget, year, month, day);
+    lv_calendar_set_month_shown(ui_Calendar_widget, year, month);
+    lv_calendar_set_chinese_mode(ui_Calendar_widget, true);
+    
+    static const char * day_names[7] = {"日", "一", "二", "三", "四", "五", "六"};
+    lv_calendar_set_day_names(ui_Calendar_widget, day_names);
+
+
+    static lv_calendar_date_t highlighted_days[3];       /*Only its pointer will be saved so should be static*/
+    highlighted_days[0].year = year;
+    highlighted_days[0].month = month;
+    highlighted_days[0].day = day;
+    lv_calendar_set_highlighted_dates(ui_Calendar_widget, highlighted_days, 1);
+}
+
 // event funtions
 void ui_event_calendar(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
 
     if(event_code == LV_EVENT_SCREEN_LOADED) {
-        calendar_loaded(e);
+        update_calendar();
     }
 }
 
@@ -22,27 +71,20 @@ void ui_event_calendar(lv_event_t * e)
 
 void ui_calendar_screen_init(void)
 {
-    ui_calendar = lv_obj_create(NULL);
-    lv_obj_remove_flag(ui_calendar, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_flex_flow(ui_calendar, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(ui_calendar, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
-    lv_obj_set_style_text_font(ui_calendar, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_calendar = ui_base_create(NULL);
 
-    ui_Container75 = lv_obj_create(ui_calendar);
-    lv_obj_remove_style_all(ui_Container75);
-    lv_obj_set_height(ui_Container75, 25);
-    lv_obj_set_width(ui_Container75, lv_pct(100));
-    lv_obj_set_align(ui_Container75, LV_ALIGN_CENTER);
-    lv_obj_remove_flag(ui_Container75, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_bg_color(ui_Container75, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_Container75, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_t * display = ui_comp_get_child(ui_calendar, UI_COMP_DISPLAY_CONTAINER);
+    ui_Calendar_widget = lv_calendar_create(display);
+    lv_obj_t * calendar_header = lv_calendar_add_header_dropdown(ui_Calendar_widget);
 
-    ui_Calendar_widget = lv_calendar_create(ui_calendar);
-    lv_obj_t * ui_Calendar_widget_header = lv_calendar_header_arrow_create(ui_Calendar_widget);
+    lv_obj_set_style_text_font(calendar_header, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_width(ui_Calendar_widget, lv_pct(100));
     lv_obj_set_flex_grow(ui_Calendar_widget, 1);
     lv_obj_set_align(ui_Calendar_widget, LV_ALIGN_CENTER);
     lv_obj_set_style_pad_bottom(ui_Calendar_widget, 20, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Calendar_widget, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    update_calendar();
 
     lv_obj_add_event_cb(ui_calendar, ui_event_calendar, LV_EVENT_ALL, NULL);
 
@@ -54,7 +96,5 @@ void ui_calendar_screen_destroy(void)
 
     // NULL screen variables
     ui_calendar = NULL;
-    ui_Container75 = NULL;
     ui_Calendar_widget = NULL;
-
 }

@@ -266,7 +266,7 @@ void bootinit(lv_event_t * e)
     lv_slider_set_value(volume_slider, sys_config.volume, LV_ANIM_OFF);
     //toast
     toast = ui_toast_create(obj_t);
-    lv_obj_set_style_text_font(toast, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(toast, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     toast_timer = lv_timer_create(toast_timer_cb, 3000, NULL);
     lv_timer_pause(toast_timer);
 
@@ -538,10 +538,10 @@ void file_manager_loaded(lv_event_t * e)
         // lv_obj_set_width(quick_access_area, lv_pct(50));
 
         lv_obj_t *path_label = lv_file_explorer_get_path_label(file_explorer);
-        lv_obj_set_style_text_font(path_label, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(path_label, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
         lv_obj_t *file_table = lv_file_explorer_get_file_table(file_explorer);
-        lv_obj_set_style_text_font(file_table, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(file_table, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_pad_top(file_table, 6, LV_PART_ITEMS);
         lv_obj_set_style_pad_bottom(file_table, 6, LV_PART_ITEMS);
 
@@ -707,29 +707,4 @@ void wifi_input_pwd_unloaded(lv_event_t * e)
     {
         lv_free(ap_record);
     }
-}
-
-void calendar_loaded(lv_event_t * e)
-{
-    uint32_t year = timeinfo.tm_year + 1900;
-    uint32_t month = timeinfo.tm_mon + 1;
-    uint32_t day = timeinfo.tm_mday;
-
-    lv_calendar_set_today_year(ui_Calendar_widget, year);
-    lv_calendar_set_today_month(ui_Calendar_widget, month);
-    lv_calendar_set_today_day(ui_Calendar_widget, day);
-    lv_calendar_set_shown_year(ui_Calendar_widget, year);
-    lv_calendar_set_shown_month(ui_Calendar_widget, month);
-    lv_calendar_set_chinese_mode(ui_Calendar_widget, true);
-    
-    static const char * day_names[7] = {"日", "一", "二", "三", "四", "五", "六"};
-    lv_calendar_set_day_names(ui_Calendar_widget, day_names);
-
-
-    static lv_calendar_date_t highlighted_days[3];       /*Only its pointer will be saved so should be static*/
-    highlighted_days[0].year = year;
-    highlighted_days[0].month = month;
-    highlighted_days[0].day = day;
-    lv_calendar_set_highlighted_dates(ui_Calendar_widget, highlighted_days, 1);
-
 }

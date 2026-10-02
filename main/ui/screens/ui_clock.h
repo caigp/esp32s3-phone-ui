@@ -5,13 +5,10 @@
 extern "C" {
 #endif
 
-#include "lvgl.h"
+#include "../ui.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
-
-// 引入可能用到的字体声明（根据实际项目字体名微调）
-LV_FONT_DECLARE(ui_font_simhei14);
 
 ///////////////////// ALARM REPEAT MASKS //////////////////
 #define ALARM_REPEAT_SUN (1 << 0)

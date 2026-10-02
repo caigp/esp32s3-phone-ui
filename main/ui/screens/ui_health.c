@@ -88,7 +88,7 @@ void ui_health_screen_init(void)
     lv_obj_set_height(ui_Label54, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_Label54, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label54, "测量");
-    lv_obj_set_style_text_font(ui_Label54, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label54, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_Label54, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_Label54, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_Label54, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -100,7 +100,7 @@ void ui_health_screen_init(void)
     lv_obj_set_x(ui_Label55, lv_pct(10));
     lv_obj_set_y(ui_Label55, lv_pct(55));
     lv_label_set_text(ui_Label55, "血液中氧气的浓度");
-    lv_obj_set_style_text_font(ui_Label55, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label55, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Container70 = lv_obj_create(ui_Container69);
     lv_obj_remove_style_all(ui_Container70);
@@ -129,7 +129,7 @@ void ui_health_screen_init(void)
     lv_label_set_text(ui_Label56, "血氧");
     lv_obj_set_style_text_color(ui_Label56, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label56, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label56, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label56, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_Label56, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_Label56, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_Label56, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -166,7 +166,7 @@ void ui_health_screen_init(void)
     lv_obj_set_height(ui_Label28, LV_SIZE_CONTENT);    /// 1
     lv_obj_set_align(ui_Label28, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label28, "测量");
-    lv_obj_set_style_text_font(ui_Label28, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label28, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_Label28, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_Label28, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_Label28, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -178,7 +178,7 @@ void ui_health_screen_init(void)
     lv_obj_set_x(ui_Label30, lv_pct(10));
     lv_obj_set_y(ui_Label30, lv_pct(55));
     lv_label_set_text(ui_Label30, "心率是心脏跳动的频率");
-    lv_obj_set_style_text_font(ui_Label30, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label30, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Container36 = lv_obj_create(ui_Container31);
     lv_obj_remove_style_all(ui_Container36);
@@ -207,7 +207,7 @@ void ui_health_screen_init(void)
     lv_label_set_text(ui_Label29, "心率");
     lv_obj_set_style_text_color(ui_Label29, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label29, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label29, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label29, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(ui_Label29, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(ui_Label29, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(ui_Label29, 0, LV_PART_MAIN | LV_STATE_DEFAULT);

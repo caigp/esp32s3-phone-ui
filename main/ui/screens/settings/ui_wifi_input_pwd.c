@@ -3,7 +3,7 @@
 // LVGL version: 9.1.0
 // Project name: xiaocaiUI
 
-#include "../ui.h"
+#include "../../ui.h"
 
 lv_obj_t * ui_wifi_input_pwd = NULL;
 lv_obj_t * ui_Container84 = NULL;
@@ -109,7 +109,7 @@ void ui_wifi_input_pwd_screen_init(void)
     lv_obj_set_y(ui_Checkbox1, 40);
     lv_obj_set_x(ui_Checkbox1, lv_pct(5));
     lv_obj_add_flag(ui_Checkbox1, LV_OBJ_FLAG_SCROLL_ON_FOCUS);     /// Flags
-    lv_obj_set_style_text_font(ui_Checkbox1, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Checkbox1, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_set_style_border_width(ui_Checkbox1, 2, LV_PART_INDICATOR | LV_STATE_DEFAULT);
     lv_obj_set_style_border_side(ui_Checkbox1, LV_BORDER_SIDE_FULL, LV_PART_INDICATOR | LV_STATE_DEFAULT);

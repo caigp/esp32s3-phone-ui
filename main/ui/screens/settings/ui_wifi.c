@@ -3,7 +3,7 @@
 // LVGL version: 9.1.0
 // Project name: xiaocaiUI
 
-#include "../ui.h"
+#include "../../ui.h"
 
 lv_obj_t * ui_wifi = NULL;
 lv_obj_t * ui_Container82 = NULL;
@@ -45,6 +45,7 @@ void ui_event_wifi(lv_event_t * e)
 void ui_wifi_screen_init(void)
 {
     ui_wifi = lv_obj_create(NULL);
+    lv_obj_remove_style_all(ui_wifi);
     lv_obj_remove_flag(ui_wifi, LV_OBJ_FLAG_PRESS_LOCK);      /// Flags
     lv_obj_set_flex_flow(ui_wifi, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(ui_wifi, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -107,7 +108,7 @@ void ui_wifi_screen_init(void)
     lv_obj_set_width(ui_wifi_scan_item1, lv_pct(100));
     lv_obj_add_flag(ui_wifi_scan_item1, LV_OBJ_FLAG_HIDDEN);     /// Flags
     lv_obj_remove_flag(ui_wifi_scan_item1, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_text_font(ui_wifi_scan_item1, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_wifi_scan_item1, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Container59 = lv_obj_create(ui_wifi_scan_item1);
     lv_obj_remove_style_all(ui_Container59);
@@ -159,7 +160,7 @@ void ui_wifi_screen_init(void)
     lv_obj_set_width(ui_wifi_scan_item2, lv_pct(100));
     lv_obj_add_flag(ui_wifi_scan_item2, LV_OBJ_FLAG_HIDDEN);     /// Flags
     lv_obj_remove_flag(ui_wifi_scan_item2, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_set_style_text_font(ui_wifi_scan_item2, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_wifi_scan_item2, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Container56 = lv_obj_create(ui_wifi_scan_item2);
     lv_obj_remove_style_all(ui_Container56);

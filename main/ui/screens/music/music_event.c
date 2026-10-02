@@ -15,11 +15,45 @@ static int music_index = 0;
 
 static const char *TAG = "Music Player";
 
+static void remove_extension_copy(const char *filename, char *output, size_t size) {
+    // 复制到输出缓冲区
+    strncpy(output, filename, size - 1);
+    output[size - 1] = '\0';
+
+    char *dot = strrchr(output, '.');
+    if (dot != NULL) {
+        *dot = '\0';
+    }
+}
+
+/* 播放的时候让唱片转起来 */
+void start_rotate(lv_obj_t * obj_t)
+{
+
+    int32_t cur = lv_img_get_angle(obj_t);
+
+    /* 设置旋转中心，默认是图片中心 */
+    lv_img_set_pivot(obj_t, lv_obj_get_width(obj_t) / 2,
+                          lv_obj_get_height(obj_t) / 2);
+
+    lv_anim_t a;
+    lv_anim_init(&a);
+    lv_anim_set_var(&a, obj_t);
+    lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t) lv_img_set_angle);
+    lv_anim_set_values(&a, cur, cur + 3600);
+    lv_anim_set_time(&a, 4000);
+    lv_anim_set_path_cb(&a, lv_anim_path_linear);
+    lv_anim_set_repeat_count(&a, LV_ANIM_REPEAT_INFINITE);
+    lv_anim_start(&a);
+}
+
 void switch_ui_pause(void *data)
 {
     ESP_LOGI(TAG, "%s", __func__);
     lv_obj_add_flag(ui_play, LV_OBJ_FLAG_HIDDEN);
     lv_obj_remove_flag(ui_pause, LV_OBJ_FLAG_HIDDEN);
+
+    start_rotate(ui_musci_changpian);
 }
 
 void switch_ui_play(void *data)
@@ -27,6 +61,8 @@ void switch_ui_play(void *data)
     ESP_LOGI(TAG, "%s", __func__);
     lv_obj_remove_flag(ui_play, LV_OBJ_FLAG_HIDDEN);
     lv_obj_add_flag(ui_pause, LV_OBJ_FLAG_HIDDEN);
+
+    lv_anim_delete(ui_musci_changpian, NULL);
 }
 
 static void duration_xcb(void *data) {
@@ -56,7 +92,9 @@ static void previous_play_music(void *data)
         esp_player_run(player);
 
         //设置正在播放的歌名
-        lv_label_set_text(ui_music_info_label, info.name);
+        char result[128];
+        remove_extension_copy(info.name, result, sizeof(result));
+        lv_label_set_text(ui_music_info_label, result);
         lrc_parse_by_audio_path(info.path);
     }
 }
@@ -78,7 +116,9 @@ static void next_play_music(void *data)
         esp_player_run(player);
 
         //设置正在播放的歌名
-        lv_label_set_text(ui_music_info_label, info.name);
+        char result[128];
+        remove_extension_copy(info.name, result, sizeof(result));
+        lv_label_set_text(ui_music_info_label, result);
         lrc_parse_by_audio_path(info.path);
     }
 }
@@ -97,7 +137,9 @@ static void ui_event_item_cb(lv_event_t * e)
         esp_player_run(player);
 
         //设置正在播放的歌名
-        lv_label_set_text(ui_music_info_label, file_info->name);
+        char result[128];
+        remove_extension_copy(file_info->name, result, sizeof(result));
+        lv_label_set_text(ui_music_info_label, result);
         lrc_parse_by_audio_path(file_info->path);
 
         music_index = (int) lv_obj_get_user_data(obj);
@@ -203,7 +245,9 @@ static void vMusicScannTask(void *arg)
             lv_obj_t *image = ui_comp_get_child(item, UI_COMP_SIMPLEITEM_IMAGE14);
 
             ESP_LOGI(TAG, "path = %s, name = %s", file_info.path, file_info.name);
-            lv_label_set_text(text, file_info.name);
+            char result[128];
+            remove_extension_copy(file_info.name, result, sizeof(result));
+            lv_label_set_text(text, result);
             lv_image_set_src(image, &ui_img_item_music_png);
             
             lv_obj_set_user_data(item, (void *) i);
@@ -219,7 +263,7 @@ static void vMusicScannTask(void *arg)
             if (i == music_index)
             {
                 //设置正在播放的歌名
-                lv_label_set_text(ui_music_info_label, file_info.name);
+                lv_label_set_text(ui_music_info_label, result);
                 lrc_parse_by_audio_path(file_info.path);
             }
 
@@ -316,7 +360,9 @@ void music_action(lv_event_t * e)
                 esp_player_run(player);
 
                 //设置正在播放的歌名
-                lv_label_set_text(ui_music_info_label, info.name);
+                char result[128];
+                remove_extension_copy(info.name, result, sizeof(result));
+                lv_label_set_text(ui_music_info_label, result);
                 lrc_parse_by_audio_path(info.path);
             }
         }

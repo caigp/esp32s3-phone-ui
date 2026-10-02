@@ -52,7 +52,7 @@ void ui_notification_panel_screen_init(void)
     lv_label_set_text(ui_notification_week_label, "星期四");
     lv_obj_set_style_text_color(ui_notification_week_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_notification_week_label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_notification_week_label, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_notification_week_label, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
 }
 

@@ -203,7 +203,7 @@ void ui_launcher_screen_init(void)
     lv_label_set_text(ui_Label1, "设置");
     lv_obj_set_style_text_color(ui_Label1, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label1, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label1, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Container3 = lv_obj_create(ui_page1);
     lv_obj_remove_style_all(ui_Container3);
@@ -232,7 +232,7 @@ void ui_launcher_screen_init(void)
     lv_label_set_text(ui_Label3, "时钟");
     lv_obj_set_style_text_color(ui_Label3, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label3, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label3, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label3, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // ui_Container29 = lv_obj_create(ui_page1);
     // lv_obj_remove_style_all(ui_Container29);
@@ -261,7 +261,7 @@ void ui_launcher_screen_init(void)
     // lv_label_set_text(ui_Label26, "温湿度");
     // lv_obj_set_style_text_color(ui_Label26, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     // lv_obj_set_style_text_opa(ui_Label26, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    // lv_obj_set_style_text_font(ui_Label26, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_set_style_text_font(ui_Label26, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // ui_Container30 = lv_obj_create(ui_page1);
     // lv_obj_remove_style_all(ui_Container30);
@@ -290,7 +290,7 @@ void ui_launcher_screen_init(void)
     // lv_label_set_text(ui_Label27, "健康");
     // lv_obj_set_style_text_color(ui_Label27, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     // lv_obj_set_style_text_opa(ui_Label27, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    // lv_obj_set_style_text_font(ui_Label27, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // lv_obj_set_style_text_font(ui_Label27, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Container47 = lv_obj_create(ui_page1);
     lv_obj_remove_style_all(ui_Container47);
@@ -319,7 +319,7 @@ void ui_launcher_screen_init(void)
     lv_label_set_text(ui_Label35, "游戏");
     lv_obj_set_style_text_color(ui_Label35, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label35, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label35, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label35, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Container52 = lv_obj_create(ui_page1);
     lv_obj_remove_style_all(ui_Container52);
@@ -348,7 +348,7 @@ void ui_launcher_screen_init(void)
     lv_label_set_text(ui_Label39, "文件");
     lv_obj_set_style_text_color(ui_Label39, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label39, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label39, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label39, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_page2 = lv_obj_create(ui_Container26);
     lv_obj_remove_style_all(ui_page2);
@@ -393,7 +393,7 @@ void ui_launcher_screen_init(void)
     lv_label_set_text(ui_Label5, "计算器");
     lv_obj_set_style_text_color(ui_Label5, lv_color_hex(0xFFFDFD), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label5, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label5, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label5, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Container61 = lv_obj_create(ui_page2);
     lv_obj_remove_style_all(ui_Container61);
@@ -423,7 +423,7 @@ void ui_launcher_screen_init(void)
     lv_label_set_text(ui_Label44, "日历");
     lv_obj_set_style_text_color(ui_Label44, lv_color_hex(0xFFFDFD), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label44, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label44, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label44, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_page3 = lv_obj_create(ui_Container26);
     lv_obj_remove_style_all(ui_page3);
@@ -467,7 +467,7 @@ void ui_launcher_screen_init(void)
     lv_label_set_text(ui_Label4, "音乐");
     lv_obj_set_style_text_color(ui_Label4, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label4, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label4, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label4, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_volumeslider2 = lv_slider_create(ui_launcher);
     lv_slider_set_value(ui_volumeslider2, 50, LV_ANIM_OFF);

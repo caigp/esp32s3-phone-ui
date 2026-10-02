@@ -14,13 +14,9 @@ extern "C" {
 extern void ui_Settings_screen_init(void);
 extern void ui_Settings_screen_destroy(void);
 extern lv_obj_t * ui_Settings;
-extern lv_obj_t * ui_Container80;
-extern lv_obj_t * ui_Container81;
-extern void ui_event_Container53(lv_event_t * e);
-extern lv_obj_t * ui_Container53;
-extern lv_obj_t * ui_Image17;
-extern lv_obj_t * ui_Label41;
-extern lv_obj_t * ui_Image19;
+
+extern void ui_event_wifi_item(lv_event_t * e);
+
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

@@ -24,13 +24,14 @@
   ],
   "idf.currentSetup": "C:\\esp\\v6.0.2\\esp-idf",
   "idf.customExtraVars": {
-    "IDF_TARGET": "esp32s3"
+    "IDF_TARGET": "esp32s3",
+    "ADF_PATH": "C:\\Espressif\\tools\\esp-adf"
   },
   "clangd.path": "C:\\Espressif\\tools\\esp-clang\\esp-20.1.1_20250829\\esp-clang\\bin\\clangd.exe",
   "clangd.arguments": [
     "--background-index",
     "--query-driver=**",
-    "--compile-commands-dir=c:\\Users\\caigp\\Downloads\\xiaocai_esp32_project\\build"
+    "--compile-commands-dir=c:\\Users\\caigp\\Documents\\esp32s3\\xiaocai_esp32_project\\build"
   ],
   "idf.flashType": "UART",
   "idf.port": "COM4"

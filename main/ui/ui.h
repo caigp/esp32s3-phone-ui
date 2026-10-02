@@ -31,9 +31,10 @@ extern "C" {
 #include "screens/ui_nes_game.h"
 #include "screens/ui_gaming.h"
 #include "screens/ui_file_manager.h"
-#include "screens/ui_Settings.h"
-#include "screens/ui_wifi.h"
-#include "screens/ui_wifi_input_pwd.h"
+#include "screens/settings/ui_Settings.h"
+#include "screens/settings/ui_wifi.h"
+#include "screens/settings/ui_wifi_input_pwd.h"
+#include "screens/settings/ui_device_info.h"
 #include "screens/ui_calendar.h"
 #include "screens/ui_notification_panel.h"
 #include "screens/ui_clock.h"
@@ -75,9 +76,11 @@ LV_IMG_DECLARE(ui_img_icon_wifi_black_png);    // assets/icon_wifi_black.png
 LV_IMG_DECLARE(ui_img_icon_circle_check_png);    // assets/icon_circle_check.png
 LV_IMG_DECLARE(ui_img_icon_lock_png);    // assets/icon_lock.png
 LV_IMG_DECLARE(ui_img_icon_wifi_small_png);    // assets/icon_wifi_small.png
+LV_IMG_DECLARE(ui_img_icon_device_info);
+LV_IMG_DECLARE(ui_img_liteui);
 
 // FONTS
-LV_FONT_DECLARE(ui_font_simhei14);
+extern lv_font_t *ui_font_simhei14;
 
 // UI INIT
 void ui_init(void);

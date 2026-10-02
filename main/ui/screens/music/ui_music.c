@@ -128,6 +128,7 @@ void ui_event_music_refresh(lv_event_t * e)
 void ui_music_screen_init(void)
 {
     ui_music = lv_obj_create(NULL);
+    lv_obj_remove_style_all(ui_music);
     lv_obj_set_scrollbar_mode(ui_music, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_scroll_snap_x(ui_music, LV_SCROLL_SNAP_START);
     lv_obj_set_flex_flow(ui_music, LV_FLEX_FLOW_COLUMN);
@@ -217,7 +218,7 @@ void ui_music_screen_init(void)
     lv_obj_set_style_text_color(ui_music_info_label, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_music_info_label, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_music_info_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_music_info_label, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_music_info_label, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Container39 = lv_obj_create(ui_Container42);
     lv_obj_remove_style_all(ui_Container39);
@@ -406,7 +407,7 @@ void ui_music_screen_init(void)
     lv_obj_set_style_text_color(ui_Label32, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label32, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_Label32, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label32, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label32, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_music_refresh = lv_image_create(ui_Container46);
     lv_image_set_src(ui_music_refresh, &ui_img_icon_refresh_png);
@@ -518,7 +519,7 @@ void lrc_clear(void)
         lv_label_set_text(empty_label, "暂无歌词");
         lv_obj_set_width(empty_label, lv_pct(100));
         lv_obj_set_style_text_align(empty_label, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-        lv_obj_set_style_text_font(empty_label, &ui_font_simhei14, LV_PART_MAIN);
+        lv_obj_set_style_text_font(empty_label, ui_font_simhei14, LV_PART_MAIN);
         lv_obj_set_style_text_color(empty_label, lv_color_hex(0x888888), LV_PART_MAIN);
         lv_obj_set_style_text_opa(empty_label, 150, LV_PART_MAIN);
     }
@@ -576,7 +577,7 @@ bool lrc_parse(const char *lrc_str)
         lv_label_set_text(g_lrc_labels[i], g_lrc_lines[i].text);
         lv_obj_set_width(g_lrc_labels[i], lv_pct(90));
         lv_obj_set_style_text_align(g_lrc_labels[i], LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
-        lv_obj_set_style_text_font(g_lrc_labels[i], &ui_font_simhei14, LV_PART_MAIN);
+        lv_obj_set_style_text_font(g_lrc_labels[i], ui_font_simhei14, LV_PART_MAIN);
 
         // 普通行样式
         lv_obj_set_style_text_color(g_lrc_labels[i], lv_color_hex(0x888888), LV_PART_MAIN);

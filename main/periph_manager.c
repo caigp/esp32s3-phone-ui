@@ -1,7 +1,6 @@
 // periph_manager.c
 #include "periph_manager.h"
 
-
 static const char *TAG = "periph_manager";
 
 i2c_master_bus_handle_t g_i2c_bus = NULL;

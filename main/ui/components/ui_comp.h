@@ -20,6 +20,7 @@ extern uint32_t LV_EVENT_GET_COMP_CHILD;
 #include "ui_comp_simpleitem.h"
 #include "ui_comp_toast.h"
 #include "ui_comp_volumeslider.h"
+#include "ui_comp_base.h"
 
 #ifdef __cplusplus
 } /*extern "C"*/

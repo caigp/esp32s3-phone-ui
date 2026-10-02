@@ -32,7 +32,6 @@ void wifi_unloaded(lv_event_t * e);
 void wifi_input_pwd_unloaded(lv_event_t * e);
 void on_show_password_changed(lv_event_t * e);
 void wifi_pwd_done(lv_event_t * e);
-void calendar_loaded(lv_event_t * e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

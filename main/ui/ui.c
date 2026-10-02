@@ -24,13 +24,21 @@ lv_obj_t * ui____initial_actions0;
 
 ///////////////////// SCREENS ////////////////////
 
+lv_font_t *ui_font_simhei14;
+
+extern const uint8_t simhei14_bin_start[] asm("_binary_simhei14_bin_start");
+extern const uint8_t simhei14_bin_end[]   asm("_binary_simhei14_bin_end");
+
 void ui_init(void)
 {
     LV_EVENT_GET_COMP_CHILD = lv_event_register_id();
 
-    lv_disp_t * dispp = lv_display_get_default();
-    lv_theme_t * theme = lv_theme_simple_init(dispp);
-    lv_disp_set_theme(dispp, theme);
+    size_t font_size = simhei14_bin_end - simhei14_bin_start;
+    ui_font_simhei14 = lv_binfont_create_from_buffer((void *) simhei14_bin_start, font_size);
+
+    // lv_disp_t * dispp = lv_display_get_default();
+    // lv_theme_t * theme = lv_theme_simple_init(dispp);
+    // lv_disp_set_theme(dispp, theme);
     ui_boot_screen_init();
     ui_launcher_screen_init();
     ui_calculator_screen_init();
@@ -46,12 +54,15 @@ void ui_init(void)
     ui_calendar_screen_init();
     ui_notification_panel_screen_init();
     ui_clock_screen_init();
+    ui_device_info_init();
     ui____initial_actions0 = lv_obj_create(NULL);
     lv_disp_load_scr(ui_boot);
 }
 
 void ui_destroy(void)
 {
+    lv_binfont_destroy(ui_font_simhei14);
+
     ui_boot_screen_destroy();
     ui_launcher_screen_destroy();
     ui_calculator_screen_destroy();
@@ -67,4 +78,5 @@ void ui_destroy(void)
     ui_calendar_screen_destroy();
     ui_notification_panel_screen_destroy();
     ui_clock_screen_destroy();
+    ui_device_info_destroy();
 }

@@ -400,7 +400,7 @@ static void vWifiScanTask(void *pvParameters)
                 lv_obj_set_height(ui_wifi_scan_item, 43);
                 lv_obj_set_width(ui_wifi_scan_item, lv_pct(100));
                 lv_obj_remove_flag(ui_wifi_scan_item, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-                lv_obj_set_style_text_font(ui_wifi_scan_item, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+                lv_obj_set_style_text_font(ui_wifi_scan_item, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
                 ui_Container56 = lv_obj_create(ui_wifi_scan_item);
                 lv_obj_set_name(ui_Container56, "wifi_item");

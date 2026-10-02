@@ -15,7 +15,6 @@ extern void ui_calendar_screen_init(void);
 extern void ui_calendar_screen_destroy(void);
 extern void ui_event_calendar(lv_event_t * e);
 extern lv_obj_t * ui_calendar;
-extern lv_obj_t * ui_Container75;
 extern lv_obj_t * ui_Calendar_widget;
 // CUSTOM VARIABLES
 

@@ -101,7 +101,7 @@ void ui_temp_RH_screen_init(void)
     lv_label_set_text(ui_temp_text, "温度 20℃");
     lv_obj_set_style_text_color(ui_temp_text, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_temp_text, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_temp_text, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_temp_text, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_temp_tip = lv_label_create(ui_Container27);
     lv_obj_set_width(ui_temp_tip, LV_SIZE_CONTENT);   /// 1
@@ -110,7 +110,7 @@ void ui_temp_RH_screen_init(void)
     lv_label_set_text(ui_temp_tip, "不冷不热，神仙天气");
     lv_obj_set_style_text_color(ui_temp_tip, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_temp_tip, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_temp_tip, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_temp_tip, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Container28 = lv_obj_create(ui_Container77);
     lv_obj_remove_style_all(ui_Container28);
@@ -148,7 +148,7 @@ void ui_temp_RH_screen_init(void)
     lv_label_set_text(ui_RH_text, "湿度 50%");
     lv_obj_set_style_text_color(ui_RH_text, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_RH_text, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_RH_text, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_RH_text, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_RH_tip = lv_label_create(ui_Container28);
     lv_obj_set_width(ui_RH_tip, LV_SIZE_CONTENT);   /// 1
@@ -157,7 +157,7 @@ void ui_temp_RH_screen_init(void)
     lv_label_set_text(ui_RH_tip, "非常潮湿，注意除湿防霉");
     lv_obj_set_style_text_color(ui_RH_tip, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_RH_tip, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_RH_tip, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_RH_tip, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Container44 = lv_obj_create(ui_Container77);
     lv_obj_remove_style_all(ui_Container44);
@@ -197,7 +197,7 @@ void ui_temp_RH_screen_init(void)
     lv_label_set_text(ui_hPa_text, "0 hPa");
     lv_obj_set_style_text_color(ui_hPa_text, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_hPa_text, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_hPa_text, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_hPa_text, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_hPa = lv_label_create(ui_Container44);
     lv_obj_set_width(ui_hPa, LV_SIZE_CONTENT);   /// 1
@@ -206,7 +206,7 @@ void ui_temp_RH_screen_init(void)
     lv_label_set_text(ui_hPa, "气压");
     lv_obj_set_style_text_color(ui_hPa, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_hPa, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_hPa, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_hPa, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_temp_RH, ui_event_temp_RH, LV_EVENT_ALL, NULL);
 

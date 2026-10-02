@@ -200,11 +200,12 @@ void init_notification_panel()
     lv_obj_t * obj_t = lv_layer_top();
 
     lv_obj_t *ui_top_touch = lv_obj_create(obj_t);
+    lv_obj_remove_style_all(ui_top_touch);
     lv_obj_set_size(ui_top_touch, lv_pct(100), 25);
     lv_obj_set_style_bg_color(ui_top_touch, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_top_touch, LV_OPA_0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_add_flag(ui_top_touch, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_remove_flag(ui_top_touch, LV_OBJ_FLAG_GESTURE_BUBBLE);
+    lv_obj_remove_flag(ui_top_touch, LV_OBJ_FLAG_GESTURE_BUBBLE | LV_OBJ_FLAG_SCROLLABLE);
 
     ui_notification_panel_ = lv_obj_create(obj_t);
     lv_obj_set_y(ui_notification_panel_, -lv_pct(100));
@@ -247,7 +248,7 @@ void init_notification_panel()
     lv_label_set_text(ui_notification_week_label_, "星期四");
     lv_obj_set_style_text_color(ui_notification_week_label_, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_notification_week_label_, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_notification_week_label_, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_notification_week_label_, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_notification_panel_, ui_event_Notification_Panel, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_top_touch, ui_event_top_touch, LV_EVENT_ALL, NULL);
@@ -327,10 +328,10 @@ void init_navigation_bar()
     // 创建白条指示器，使用差值混合模式实现反色效果
     lv_obj_t * ui_baitiao = lv_obj_create(ui_navigation_bar);
     lv_obj_remove_style_all(ui_baitiao);
-    lv_obj_set_size(ui_baitiao, lv_pct(50), 5);
+    lv_obj_set_size(ui_baitiao, lv_pct(40), 4);
     lv_obj_set_style_blend_mode(ui_baitiao, LV_BLEND_MODE_DIFFERENCE, 0);
     lv_obj_set_style_bg_color(ui_baitiao, lv_color_hex(0xffffff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_baitiao, LV_OPA_50, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_baitiao, LV_OPA_30, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_radius(ui_baitiao, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_align(ui_baitiao, LV_ALIGN_CENTER);
 

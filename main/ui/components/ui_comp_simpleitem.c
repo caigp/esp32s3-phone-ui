@@ -46,7 +46,7 @@ lv_obj_t * ui_simpleitem_create(lv_obj_t * comp_parent)
     lv_label_set_text(cui_simple_item_text, "文本");
     lv_obj_set_style_text_color(cui_simple_item_text, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(cui_simple_item_text, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(cui_simple_item_text, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(cui_simple_item_text, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_left(cui_simple_item_text, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_right(cui_simple_item_text, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_top(cui_simple_item_text, 0, LV_PART_MAIN | LV_STATE_DEFAULT);

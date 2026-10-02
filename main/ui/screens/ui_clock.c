@@ -563,7 +563,7 @@ static void ui_event_WorldClockCard_click(lv_event_t * e)
     char msg[64];
     snprintf(msg, sizeof(msg), "是否删除“%s”？", item->city_name);
     lv_label_set_text(title, msg);
-    lv_obj_set_style_text_font(title, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(title, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(title, lv_color_hex(0x111111), 0);
     lv_obj_set_style_pad_bottom(title, 16, 0);
 
@@ -586,7 +586,7 @@ static void ui_event_WorldClockCard_click(lv_event_t * e)
 
     lv_obj_t * lbl_cancel = lv_label_create(btn_cancel);
     lv_label_set_text(lbl_cancel, "取消");
-    lv_obj_set_style_text_font(lbl_cancel, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(lbl_cancel, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(lbl_cancel, lv_color_hex(0x333333), 0);
     lv_obj_center(lbl_cancel);
 
@@ -600,7 +600,7 @@ static void ui_event_WorldClockCard_click(lv_event_t * e)
 
     lv_obj_t * lbl_del = lv_label_create(btn_del);
     lv_label_set_text(lbl_del, "删除");
-    lv_obj_set_style_text_font(lbl_del, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(lbl_del, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(lbl_del, lv_color_hex(0xFFFFFF), 0);
     lv_obj_center(lbl_del);
 }
@@ -675,7 +675,7 @@ static void ui_open_add_world_clock_dialog(void)
 
     lv_obj_t * title = lv_label_create(header);
     lv_label_set_text(title, "选择城市");
-    lv_obj_set_style_text_font(title, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(title, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(title, lv_color_hex(0x111111), 0);
 
     lv_obj_t * close_btn = lv_btn_create(header);
@@ -687,7 +687,7 @@ static void ui_open_add_world_clock_dialog(void)
 
     lv_obj_t * close_lbl = lv_label_create(close_btn);
     lv_label_set_text(close_lbl, "X");
-    lv_obj_set_style_text_font(close_lbl, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(close_lbl, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(close_lbl, lv_color_hex(0x666666), 0);
     lv_obj_center(close_lbl);
 
@@ -711,7 +711,7 @@ static void ui_open_add_world_clock_dialog(void)
 
         lv_obj_t * name_lbl = lv_label_create(item_btn);
         lv_label_set_text(name_lbl, g_preset_cities[i].city_name);
-        lv_obj_set_style_text_font(name_lbl, &ui_font_simhei14, 0);
+        lv_obj_set_style_text_font(name_lbl, ui_font_simhei14, 0);
         lv_obj_set_style_text_color(name_lbl, lv_color_hex(0x222222), 0);
         lv_obj_align(name_lbl, LV_ALIGN_LEFT_MID, 10, 0);
     }
@@ -762,23 +762,25 @@ static void ui_open_alarm_dialog(alarm_item_t * item)
     lv_obj_t * card = lv_obj_create(ui_AlarmDialog);
     lv_obj_set_width(card, lv_pct(90));
     lv_obj_set_height(card, LV_SIZE_CONTENT);
+    lv_obj_set_scrollbar_mode(card, LV_SCROLLBAR_MODE_OFF);
     lv_obj_center(card);
     
     lv_obj_set_style_radius(card, 20, 0);
     lv_obj_set_style_bg_color(card, lv_color_hex(0xFFFFFF), 0);
-    lv_obj_set_style_pad_all(card, 16, 0);
+    lv_obj_set_style_pad_all(card, 8, 0);
     lv_obj_set_style_border_width(card, 0, 0);
     
     lv_obj_set_flex_flow(card, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(card, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_flex_align(card, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START);
 
     lv_obj_t * title = lv_label_create(card);
     lv_label_set_text(title, (item != NULL) ? "修改闹钟" : "添加闹钟");
-    lv_obj_set_style_text_font(title, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(title, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(title, lv_color_hex(0x111111), 0);
-    lv_obj_set_style_pad_bottom(title, 8, 0);
+    // lv_obj_set_style_pad_bottom(title, 4, 0);
 
     lv_obj_t * roller_cnt = lv_obj_create(card);
+    lv_obj_remove_flag(roller_cnt, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_width(roller_cnt, lv_pct(100));
     lv_obj_set_height(roller_cnt, LV_SIZE_CONTENT); 
     lv_obj_set_flex_flow(roller_cnt, LV_FLEX_FLOW_ROW);
@@ -820,27 +822,26 @@ static void ui_open_alarm_dialog(alarm_item_t * item)
 
     ui_RollerHour = lv_roller_create(roller_cnt);
     lv_roller_set_options(ui_RollerHour, hour_options, LV_ROLLER_MODE_NORMAL);
-    lv_roller_set_visible_row_count(ui_RollerHour, 5);
+    lv_roller_set_visible_row_count(ui_RollerHour, 3);
     lv_obj_set_style_text_align(ui_RollerHour, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_set_width(ui_RollerHour, lv_pct(40));
-    lv_obj_set_style_text_font(ui_RollerHour, &ui_font_simhei14, 0);
-    lv_obj_set_style_text_font(ui_RollerHour, &ui_font_simhei14, LV_PART_SELECTED);
+    lv_obj_set_style_text_font(ui_RollerHour, ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(ui_RollerHour, ui_font_simhei14, LV_PART_SELECTED);
     lv_obj_add_style(ui_RollerHour, &style_roller_main, LV_PART_MAIN);
     lv_obj_add_style(ui_RollerHour, &style_roller_selected, LV_PART_SELECTED);
 
     lv_obj_t * colon = lv_label_create(roller_cnt);
     lv_label_set_text(colon, ":");
-    lv_obj_set_style_text_font(colon, &ui_font_simhei14, 0);
-    lv_obj_set_style_pad_left(colon, 8, 0);
-    lv_obj_set_style_pad_right(colon, 8, 0);
+    lv_obj_set_style_text_font(colon, ui_font_simhei14, 0);
+    lv_obj_set_style_text_align(colon, LV_TEXT_ALIGN_CENTER, 0);
 
     ui_RollerMin = lv_roller_create(roller_cnt);
     lv_roller_set_options(ui_RollerMin, min_options, LV_ROLLER_MODE_NORMAL);
-    lv_roller_set_visible_row_count(ui_RollerMin, 5);
+    lv_roller_set_visible_row_count(ui_RollerMin, 3);
     lv_obj_set_style_text_align(ui_RollerMin, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_set_width(ui_RollerMin, lv_pct(40));
-    lv_obj_set_style_text_font(ui_RollerMin, &ui_font_simhei14, 0);
-    lv_obj_set_style_text_font(ui_RollerMin, &ui_font_simhei14, LV_PART_SELECTED);
+    lv_obj_set_style_text_font(ui_RollerMin, ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(ui_RollerMin, ui_font_simhei14, LV_PART_SELECTED);
     lv_obj_add_style(ui_RollerMin, &style_roller_main, LV_PART_MAIN);
     lv_obj_add_style(ui_RollerMin, &style_roller_selected, LV_PART_SELECTED);
 
@@ -849,12 +850,13 @@ static void ui_open_alarm_dialog(alarm_item_t * item)
 
     lv_obj_t * week_label = lv_label_create(card);
     lv_label_set_text(week_label, "重复周期");
-    lv_obj_set_style_text_font(week_label, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(week_label, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(week_label, lv_color_hex(0x666666), 0);
-    lv_obj_set_style_pad_top(week_label, 10, 0);
-    lv_obj_set_style_pad_bottom(week_label, 6, 0);
+    // lv_obj_set_style_pad_top(week_label, 2, 0);
+    // lv_obj_set_style_pad_bottom(week_label, 2, 0);
 
     lv_obj_t * week_cnt = lv_obj_create(card);
+    lv_obj_remove_style_all(week_cnt);
     lv_obj_set_scrollbar_mode(week_cnt, LV_SCROLLBAR_MODE_OFF);
     lv_obj_set_width(week_cnt, lv_pct(100));
     lv_obj_set_height(week_cnt, LV_SIZE_CONTENT);
@@ -873,6 +875,7 @@ static void ui_open_alarm_dialog(alarm_item_t * item)
     for (int i = 0; i < 7; i++) {
         lv_obj_t * w_btn = lv_btn_create(week_cnt);
         lv_obj_set_size(w_btn, 32, 32);
+        lv_obj_set_style_pad_all(w_btn, 0, 0);
         lv_obj_set_style_radius(w_btn, LV_RADIUS_CIRCLE, 0);
         lv_obj_add_flag(w_btn, LV_OBJ_FLAG_CHECKABLE);
         
@@ -888,7 +891,7 @@ static void ui_open_alarm_dialog(alarm_item_t * item)
 
         lv_obj_t * w_lbl = lv_label_create(w_btn);
         lv_label_set_text(w_lbl, week_names[i]);
-        lv_obj_set_style_text_font(w_lbl, &ui_font_simhei14, 0);
+        lv_obj_set_style_text_font(w_lbl, ui_font_simhei14, 0);
         lv_obj_set_style_text_color(w_lbl, lv_color_hex(0x000000), LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(w_lbl, lv_color_hex(0xFFFFFF), LV_STATE_CHECKED);
         lv_obj_center(w_lbl);
@@ -897,13 +900,14 @@ static void ui_open_alarm_dialog(alarm_item_t * item)
     }
 
     lv_obj_t * btn_cnt = lv_obj_create(card);
+    lv_obj_remove_style_all(btn_cnt);
     lv_obj_set_width(btn_cnt, lv_pct(100));
     lv_obj_set_height(btn_cnt, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(btn_cnt, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(btn_cnt, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_bg_opa(btn_cnt, 0, 0);
     lv_obj_set_style_border_width(btn_cnt, 0, 0);
-    lv_obj_set_style_pad_top(btn_cnt, 16, 0);
+    // lv_obj_set_style_pad_top(btn_cnt, 5, 0);
     lv_obj_set_style_pad_left(btn_cnt, 0, 0);
     lv_obj_set_style_pad_right(btn_cnt, 0, 0);
 
@@ -914,7 +918,7 @@ static void ui_open_alarm_dialog(alarm_item_t * item)
     lv_obj_set_style_shadow_width(btn_left, 0, 0);
 
     lv_obj_t * lbl_left = lv_label_create(btn_left);
-    lv_obj_set_style_text_font(lbl_left, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(lbl_left, ui_font_simhei14, 0);
     lv_obj_center(lbl_left);
 
     if (item != NULL) {
@@ -939,7 +943,7 @@ static void ui_open_alarm_dialog(alarm_item_t * item)
 
     lv_obj_t * lbl_save = lv_label_create(btn_save);
     lv_label_set_text(lbl_save, "保存");
-    lv_obj_set_style_text_font(lbl_save, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(lbl_save, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(lbl_save, lv_color_hex(0xFFFFFF), 0);
     lv_obj_center(lbl_save);
 }
@@ -978,7 +982,7 @@ static lv_obj_t * ui_AlarmCard_create(lv_obj_t * parent, alarm_item_t * alarm)
 
     lv_obj_t * lbl_time = lv_label_create(text_cnt);
     lv_label_set_text(lbl_time, alarm->time_str);
-    lv_obj_set_style_text_font(lbl_time, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(lbl_time, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(lbl_time, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_clear_flag(lbl_time, LV_OBJ_FLAG_CLICKABLE);
 
@@ -992,7 +996,7 @@ static lv_obj_t * ui_AlarmCard_create(lv_obj_t * parent, alarm_item_t * alarm)
     lv_obj_set_width(lbl_sub, lv_pct(100));
     lv_label_set_long_mode(lbl_sub, LV_LABEL_LONG_SCROLL_CIRCULAR);
     lv_label_set_text(lbl_sub, sub_buf);
-    lv_obj_set_style_text_font(lbl_sub, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(lbl_sub, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(lbl_sub, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_clear_flag(lbl_sub, LV_OBJ_FLAG_CLICKABLE);
 
@@ -1069,11 +1073,11 @@ static lv_obj_t * ui_WorldClockCard_create(lv_obj_t * parent, world_clock_item_t
     lv_obj_set_style_bg_opa(text_cnt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_width(text_cnt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_all(text_cnt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_clear_flag(text_cnt, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_clear_flag(text_cnt, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
 
     lv_obj_t * lbl_city = lv_label_create(text_cnt);
     lv_label_set_text(lbl_city, clock_item->city_name);
-    lv_obj_set_style_text_font(lbl_city, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(lbl_city, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(lbl_city, lv_color_hex(0x222222), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_clear_flag(lbl_city, LV_OBJ_FLAG_CLICKABLE);
 
@@ -1083,13 +1087,15 @@ static lv_obj_t * ui_WorldClockCard_create(lv_obj_t * parent, world_clock_item_t
 
     lv_obj_t * lbl_diff = lv_label_create(text_cnt);
     lv_label_set_text(lbl_diff, diff_buf);
-    lv_obj_set_style_text_font(lbl_diff, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_width(lbl_diff, lv_pct(100));
+    lv_label_set_long_mode(lbl_diff, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_style_text_font(lbl_diff, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(lbl_diff, lv_color_hex(0x999999), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_clear_flag(lbl_diff, LV_OBJ_FLAG_CLICKABLE);
 
     lv_obj_t * lbl_time = lv_label_create(card);
     lv_label_set_text(lbl_time, time_buf);
-    lv_obj_set_style_text_font(lbl_time, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(lbl_time, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(lbl_time, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_clear_flag(lbl_time, LV_OBJ_FLAG_CLICKABLE);
 
@@ -1115,7 +1121,7 @@ static lv_obj_t * ui_create_page_floating_btn(lv_obj_t * parent, const char * te
 
     lv_obj_t * lbl = lv_label_create(btn);
     lv_label_set_text(lbl, text);
-    lv_obj_set_style_text_font(lbl, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(lbl, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_align(lbl, LV_ALIGN_CENTER);
     lv_obj_set_style_text_color(lbl, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -1138,7 +1144,7 @@ static lv_obj_t * ui_TabItem_create(lv_obj_t * parent, const char * icon, const 
 
     lv_obj_t * text_lbl = lv_label_create(btn);
     lv_label_set_text(text_lbl, text);
-    lv_obj_set_style_text_font(text_lbl, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(text_lbl, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     return btn;
 }
@@ -1216,12 +1222,12 @@ static void ui_stopwatch_add_lap_item(size_t lap_index, uint32_t ms_val)
 
     lv_obj_t * lbl_title = lv_label_create(row);
     lv_label_set_text(lbl_title, lap_str);
-    lv_obj_set_style_text_font(lbl_title, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(lbl_title, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(lbl_title, lv_color_hex(0x666666), 0);
 
     lv_obj_t * lbl_val = lv_label_create(row);
     lv_label_set_text(lbl_val, val_str);
-    lv_obj_set_style_text_font(lbl_val, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(lbl_val, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(lbl_val, lv_color_hex(0x111111), 0);
 
     // 将最新的计圈显示在最上方
@@ -1352,7 +1358,7 @@ static void ui_timer_show_alert_dialog(void)
 
     lv_obj_t * title = lv_label_create(card);
     lv_label_set_text(title, "计时完成！");
-    lv_obj_set_style_text_font(title, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(title, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(title, lv_color_hex(0x111111), 0);
     lv_obj_set_style_pad_bottom(title, 16, 0);
 
@@ -1365,7 +1371,7 @@ static void ui_timer_show_alert_dialog(void)
 
     lv_obj_t * lbl_ok = lv_label_create(btn_ok);
     lv_label_set_text(lbl_ok, "知道了");
-    lv_obj_set_style_text_font(lbl_ok, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(lbl_ok, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(lbl_ok, lv_color_hex(0xFFFFFF), 0);
     lv_obj_center(lbl_ok);
 }
@@ -1489,11 +1495,11 @@ static void ui_build_alarm_list(lv_obj_t * parent)
 
     ui_TitleLabel = lv_label_create(parent);
     lv_label_set_text(ui_TitleLabel, "闹钟");
-    lv_obj_set_style_text_font(ui_TitleLabel, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_TitleLabel, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui_TitleLabel, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_SubTitleLabel = lv_label_create(parent);
-    lv_obj_set_style_text_font(ui_SubTitleLabel, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_SubTitleLabel, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui_SubTitleLabel, lv_color_hex(0x888888), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_pad_bottom(ui_SubTitleLabel, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -1516,7 +1522,7 @@ static void ui_build_world_clock(lv_obj_t * parent)
 
     ui_TitleLabel = lv_label_create(parent);
     lv_label_set_text(ui_TitleLabel, "世界时钟");
-    lv_obj_set_style_text_font(ui_TitleLabel, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_TitleLabel, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui_TitleLabel, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT);
 
     for (size_t i = 0; i < g_world_clock_count; i++) {
@@ -1538,7 +1544,7 @@ static void ui_build_stopwatch(lv_obj_t * parent)
 
     ui_TitleLabel = lv_label_create(parent);
     lv_label_set_text(ui_TitleLabel, "秒表");
-    lv_obj_set_style_text_font(ui_TitleLabel, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_TitleLabel, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui_TitleLabel, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // 时间显示卡片
@@ -1551,7 +1557,7 @@ static void ui_build_stopwatch(lv_obj_t * parent)
 
     ui_StopwatchTimeLabel = lv_label_create(display_cnt);
     ui_stopwatch_update_display();
-    lv_obj_set_style_text_font(ui_StopwatchTimeLabel, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(ui_StopwatchTimeLabel, ui_font_simhei14, 0);
     lv_obj_align(ui_StopwatchTimeLabel, LV_ALIGN_CENTER, 0, 0);
     lv_obj_set_style_text_color(ui_StopwatchTimeLabel, lv_color_hex(0x111111), 0);
 
@@ -1576,7 +1582,7 @@ static void ui_build_stopwatch(lv_obj_t * parent)
 
     ui_StopwatchBtnLapResetLbl = lv_label_create(ui_StopwatchBtnLapReset);
     lv_label_set_text(ui_StopwatchBtnLapResetLbl, (g_stopwatch_state == STOPWATCH_STATE_PAUSED) ? "复位" : "计圈");
-    lv_obj_set_style_text_font(ui_StopwatchBtnLapResetLbl, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(ui_StopwatchBtnLapResetLbl, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(ui_StopwatchBtnLapResetLbl, lv_color_hex(0xFFFFFF), 0);
     lv_obj_center(ui_StopwatchBtnLapResetLbl);
 
@@ -1601,7 +1607,7 @@ static void ui_build_stopwatch(lv_obj_t * parent)
     else if (g_stopwatch_state == STOPWATCH_STATE_PAUSED) start_lbl_text = "继续";
     
     lv_label_set_text(ui_StopwatchBtnStartPauseLbl, start_lbl_text);
-    lv_obj_set_style_text_font(ui_StopwatchBtnStartPauseLbl, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(ui_StopwatchBtnStartPauseLbl, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(ui_StopwatchBtnStartPauseLbl, lv_color_hex(0xFFFFFF), 0);
     lv_obj_center(ui_StopwatchBtnStartPauseLbl);
 
@@ -1629,7 +1635,7 @@ static void ui_build_timer(lv_obj_t * parent)
 
     ui_TitleLabel = lv_label_create(parent);
     lv_label_set_text(ui_TitleLabel, "计时器");
-    lv_obj_set_style_text_font(ui_TitleLabel, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_TitleLabel, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(ui_TitleLabel, lv_color_hex(0x111111), LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // 倒计时文本大屏
@@ -1642,7 +1648,7 @@ static void ui_build_timer(lv_obj_t * parent)
 
     ui_TimerTimeLabel = lv_label_create(ui_TimerDisplayCnt);
     ui_timer_update_display();
-    lv_obj_set_style_text_font(ui_TimerTimeLabel, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(ui_TimerTimeLabel, ui_font_simhei14, 0);
     lv_obj_align(ui_TimerTimeLabel, LV_ALIGN_CENTER, 0, 0);
     lv_obj_set_style_text_color(ui_TimerTimeLabel, lv_color_hex(0x111111), 0);
 
@@ -1741,7 +1747,7 @@ static void ui_build_timer(lv_obj_t * parent)
 
     lv_obj_t * lbl_cancel = lv_label_create(ui_TimerBtnCancel);
     lv_label_set_text(lbl_cancel, "取消");
-    lv_obj_set_style_text_font(lbl_cancel, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(lbl_cancel, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(lbl_cancel, lv_color_hex(0xFFFFFF), 0);
     lv_obj_center(lbl_cancel);
 
@@ -1768,7 +1774,7 @@ static void ui_build_timer(lv_obj_t * parent)
     else if (g_timer_state == TIMER_STATE_PAUSED) t_lbl_text = "继续";
 
     lv_label_set_text(ui_TimerBtnStartPauseLbl, t_lbl_text);
-    lv_obj_set_style_text_font(ui_TimerBtnStartPauseLbl, &ui_font_simhei14, 0);
+    lv_obj_set_style_text_font(ui_TimerBtnStartPauseLbl, ui_font_simhei14, 0);
     lv_obj_set_style_text_color(ui_TimerBtnStartPauseLbl, lv_color_hex(0xFFFFFF), 0);
     lv_obj_center(ui_TimerBtnStartPauseLbl);
 }
@@ -1855,6 +1861,7 @@ void ui_clock_screen_init(void)
     lv_obj_set_height(ui_TabBar, 60);
     lv_obj_set_flex_flow(ui_TabBar, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(ui_TabBar, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_remove_flag(ui_TabBar, LV_OBJ_FLAG_SCROLLABLE);
     
     lv_obj_set_style_bg_color(ui_TabBar, lv_color_hex(0x1C1C1E), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_TabBar, 255, LV_PART_MAIN | LV_STATE_DEFAULT);

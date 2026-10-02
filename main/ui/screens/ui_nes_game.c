@@ -39,6 +39,7 @@ void ui_event_game_refresh2(lv_event_t * e)
 void ui_nes_game_screen_init(void)
 {
     ui_nes_game = lv_obj_create(NULL);
+    lv_obj_remove_style_all(ui_nes_game);
     lv_obj_remove_flag(ui_nes_game, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_flex_flow(ui_nes_game, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(ui_nes_game, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -79,7 +80,7 @@ void ui_nes_game_screen_init(void)
     lv_obj_set_style_text_color(ui_Label33, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_Label33, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_align(ui_Label33, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label33, &ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label33, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_game_refresh2 = lv_image_create(ui_Container32);
     lv_image_set_src(ui_game_refresh2, &ui_img_icon_refresh_png);
