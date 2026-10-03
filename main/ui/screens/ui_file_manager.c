@@ -3,132 +3,743 @@
 // LVGL version: 9.1.0
 // Project name: xiaocaiUI
 
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <time.h>
+#include <ctype.h>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_log.h"
+#include "esp_vfs_fat.h"
+
+#include "lvgl.h"
 #include "../ui.h"
+#include "ui_file_manager.h"
+
+static const char *TAG = "UI_FILE_MGR";
+
+#define MOUNT_POINT "/sdcard"
 
 lv_obj_t * ui_file_manager = NULL;
-lv_obj_t * ui_Container54 = NULL;
-lv_obj_t * ui_file_name = NULL;
-lv_obj_t * ui_Label40 = NULL;
-lv_obj_t * ui_Label42 = NULL;
-// event funtions
-void ui_event_file_manager(lv_event_t * e)
-{
-    lv_event_code_t event_code = lv_event_get_code(e);
 
-    if(event_code == LV_EVENT_SCREEN_LOADED) {
-        file_manager_loaded(e);
-    }
-    if(event_code == LV_EVENT_SCREEN_UNLOADED) {
-        file_manager_unloaded(e);
+/* UI 控件指针 */
+static lv_obj_t * g_path_label          = NULL;
+static lv_obj_t * g_btn_paste           = NULL;
+static lv_obj_t * g_file_list_container = NULL;
+
+static lv_obj_t * g_dialog_obj          = NULL;
+static lv_obj_t * g_progress_bar        = NULL;
+static lv_obj_t * g_progress_label      = NULL;
+
+/* 剪贴板与选择状态 */
+static char g_current_dir[256] = MOUNT_POINT;
+static char g_clipboard_path[256] = {0};
+static bool g_is_cut = false;
+
+static char g_selected_full_path[256] = {0};
+static char g_selected_filename[128]  = {0};
+static bool g_selected_is_dir         = false;
+
+/* 🔹 关键标志位：防止长按松开时触发点击事件 */
+static bool g_ignore_next_click       = false;
+
+/* 异步任务结构体 */
+typedef struct {
+    char src[256];
+    char dst[256];
+    bool is_cut;
+} copy_task_param_t;
+
+/* 前置声明 */
+static void refresh_file_list(const char * path);
+static void destroy_dialog_safely(void);
+static void screen_unload_cb(lv_event_t * e);
+static void screen_load_cb(lv_event_t * e);
+static void btn_refresh_cb(lv_event_t * e);
+
+/* ---------------- 辅助函数 ---------------- */
+
+static void update_paste_btn_visibility(void)
+{
+    if (g_btn_paste) {
+        if (strlen(g_clipboard_path) > 0) {
+            lv_obj_remove_flag(g_btn_paste, LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_add_flag(g_btn_paste, LV_OBJ_FLAG_HIDDEN);
+        }
     }
 }
 
-void ui_event_Label40(lv_event_t * e)
+static void make_path(char * dest, size_t size, const char * dir, const char * file)
 {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-    if(event_code == LV_EVENT_CLICKED) {
-        file_del(e);
+    size_t len = strlen(dir);
+    if (len > 0 && (dir[len - 1] == '/' || dir[len - 1] == '\\')) {
+        snprintf(dest, size, "%s%s", dir, file);
+    } else {
+        snprintf(dest, size, "%s/%s", dir, file);
     }
 }
 
-void ui_event_Label42(lv_event_t * e)
+static void format_size(size_t size, char * buf, size_t buf_len)
 {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-    if(event_code == LV_EVENT_CLICKED) {
-        file_act_close(e);
+    if (size < 1024) {
+        snprintf(buf, buf_len, "%zu B", size);
+    } else if (size < 1024 * 1024) {
+        snprintf(buf, buf_len, "%.1f KB", size / 1024.0);
+    } else {
+        snprintf(buf, buf_len, "%.1f MB", size / (1024.0 * 1024.0));
     }
 }
 
-// build funtions
+static const char * get_file_icon(const char * filename, bool is_dir)
+{
+    if (is_dir) {
+        return LV_SYMBOL_DIRECTORY;
+    }
+
+    const char * dot = strrchr(filename, '.');
+    if (!dot || dot == filename) {
+        return LV_SYMBOL_FILE;
+    }
+
+    char ext[16];
+    size_t i = 0;
+    dot++;
+    while (dot[i] && i < sizeof(ext) - 1) {
+        ext[i] = (char)tolower((unsigned char)dot[i]);
+        i++;
+    }
+    ext[i] = '\0';
+
+    if (strcmp(ext, "jpg") == 0 || strcmp(ext, "jpeg") == 0 || strcmp(ext, "png") == 0 ||
+        strcmp(ext, "bmp") == 0 || strcmp(ext, "gif") == 0) {
+        return LV_SYMBOL_IMAGE;
+    }
+
+    if (strcmp(ext, "mp3") == 0 || strcmp(ext, "wav") == 0 || strcmp(ext, "aac") == 0 ||
+        strcmp(ext, "flac") == 0 || strcmp(ext, "ogg") == 0 || strcmp(ext, "m4a") == 0) {
+        return LV_SYMBOL_AUDIO;
+    }
+
+    if (strcmp(ext, "mp4") == 0 || strcmp(ext, "avi") == 0 || strcmp(ext, "mkv") == 0 ||
+        strcmp(ext, "mov") == 0 || strcmp(ext, "flv") == 0) {
+        return LV_SYMBOL_VIDEO;
+    }
+
+    return LV_SYMBOL_FILE;
+}
+
+static void destroy_dialog_safely(void)
+{
+    if (g_dialog_obj) {
+        lv_obj_t * parent = lv_obj_get_parent(g_dialog_obj);
+        if (parent && parent != lv_screen_active() && parent != lv_layer_top()) {
+            lv_obj_del(parent);
+        } else {
+            lv_obj_del(g_dialog_obj);
+        }
+        g_dialog_obj = NULL;
+        g_progress_bar = NULL;
+        g_progress_label = NULL;
+    }
+}
+
+/* ---------------- 文件与目录递归删除 ---------------- */
+
+static int safe_fs_remove(const char * path)
+{
+    ESP_LOGI(TAG, "正在删除文件/目录: %s", path);
+    int res = remove(path);
+    if (res != 0) {
+        res = unlink(path);
+        if (res != 0) {
+            res = rmdir(path);
+        }
+    }
+    return res;
+}
+
+static void fs_delete_recursive(const char * path)
+{
+    DIR * dir = opendir(path);
+    if (!dir) {
+        safe_fs_remove(path);
+        return;
+    }
+
+    struct dirent * entry;
+    char subpath[512];
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+
+        make_path(subpath, sizeof(subpath), path, entry->d_name);
+
+        struct stat st;
+        if (stat(subpath, &st) == 0 && S_ISDIR(st.st_mode)) {
+            fs_delete_recursive(subpath);
+        } else {
+            safe_fs_remove(subpath);
+        }
+    }
+
+    closedir(dir);
+    safe_fs_remove(path);
+}
+
+/* ---------------- 异步后台复制任务与 UI 回调 ---------------- */
+
+static void update_progress_async_cb(void * user_data)
+{
+    int percent = (int)(uintptr_t)user_data;
+    if (g_progress_bar) {
+        lv_bar_set_value(g_progress_bar, percent, LV_ANIM_OFF);
+    }
+    if (g_progress_label) {
+        char buf[16];
+        snprintf(buf, sizeof(buf), "%d%%", percent);
+        lv_label_set_text(g_progress_label, buf);
+    }
+}
+
+static void copy_finish_async_cb(void * user_data)
+{
+    destroy_dialog_safely();
+    update_paste_btn_visibility();
+    refresh_file_list(g_current_dir);
+}
+
+static void show_progress_dialog(const char * title_text)
+{
+    destroy_dialog_safely();
+    g_dialog_obj = lv_msgbox_create(NULL);
+    lv_obj_set_width(g_dialog_obj, lv_pct(80));
+    lv_obj_set_style_text_font(g_dialog_obj, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_msgbox_add_title(g_dialog_obj, title_text);
+
+    lv_obj_t * content = lv_msgbox_get_content(g_dialog_obj);
+    lv_obj_set_flex_flow(content, LV_FLEX_FLOW_COLUMN);
+
+    g_progress_bar = lv_bar_create(content);
+    lv_obj_set_width(g_progress_bar, lv_pct(100));
+    lv_obj_set_height(g_progress_bar, 15);
+    lv_bar_set_range(g_progress_bar, 0, 100);
+    lv_bar_set_value(g_progress_bar, 0, LV_ANIM_OFF);
+
+    g_progress_label = lv_label_create(content);
+    lv_label_set_text(g_progress_label, "0%");
+    lv_obj_set_style_text_font(g_progress_label, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_align(g_progress_label, LV_ALIGN_CENTER, 0, 0);
+}
+
+static void async_copy_task(void * pvParameters)
+{
+    copy_task_param_t * param = (copy_task_param_t *)pvParameters;
+
+    ESP_LOGI(TAG, "开始异步复制: [%s] -> [%s]", param->src, param->dst);
+
+    FILE * f_src = fopen(param->src, "rb");
+    if (!f_src) {
+        ESP_LOGE(TAG, "打开源文件失败: %s (errno=%d)", param->src, errno);
+        goto task_exit;
+    }
+
+    fseek(f_src, 0, SEEK_END);
+    long total_bytes = ftell(f_src);
+    fseek(f_src, 0, SEEK_SET);
+
+    FILE * f_dst = fopen(param->dst, "wb");
+    if (!f_dst) {
+        ESP_LOGE(TAG, "创建目标文件失败: %s (errno=%d)", param->dst, errno);
+        fclose(f_src);
+        goto task_exit;
+    }
+
+    uint8_t buffer[4096];
+    size_t bytes_read = 0;
+    long written_bytes = 0;
+    int last_percent = -1;
+
+    while ((bytes_read = fread(buffer, 1, sizeof(buffer), f_src)) > 0) {
+        fwrite(buffer, 1, bytes_read, f_dst);
+        written_bytes += bytes_read;
+
+        if (total_bytes > 0) {
+            int percent = (int)((written_bytes * 100) / total_bytes);
+            if (percent != last_percent) {
+                last_percent = percent;
+                lv_async_call(update_progress_async_cb, (void *)(uintptr_t)percent);
+            }
+        }
+    }
+
+    fclose(f_src);
+    fclose(f_dst);
+
+    if (param->is_cut) {
+        safe_fs_remove(param->src);
+        g_clipboard_path[0] = '\0';
+    }
+
+task_exit:
+    lv_async_call(copy_finish_async_cb, NULL);
+    free(param);
+    vTaskDelete(NULL);
+}
+
+/* ---------------- 属性与菜单 ---------------- */
+
+static void show_properties_dialog(void)
+{
+    destroy_dialog_safely();
+
+    struct stat st;
+    if (stat(g_selected_full_path, &st) != 0) {
+        ESP_LOGE(TAG, "获取属性失败: %s", g_selected_full_path);
+        return;
+    }
+
+    g_dialog_obj = lv_msgbox_create(NULL);
+    lv_obj_set_width(g_dialog_obj, lv_pct(85));
+    lv_obj_set_style_text_font(g_dialog_obj, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_msgbox_add_title(g_dialog_obj, "详细属性");
+
+    lv_obj_t * content = lv_msgbox_get_content(g_dialog_obj);
+    lv_obj_set_flex_flow(content, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(content, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    char time_str[32];
+    struct tm * tm_info = localtime(&st.st_mtime);
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", tm_info);
+
+    char size_str[32];
+    if (S_ISDIR(st.st_mode)) {
+        snprintf(size_str, sizeof(size_str), "-");
+    } else {
+        format_size(st.st_size, size_str, sizeof(size_str));
+    }
+
+    char buf[512];
+    snprintf(buf, sizeof(buf),
+             "名称: %s\n类型: %s\n大小: %s\n修改时间: %s\n路径: %s",
+             g_selected_filename,
+             S_ISDIR(st.st_mode) ? "文件夹" : "文件",
+             size_str,
+             time_str,
+             g_selected_full_path);
+
+    lv_obj_t * lbl = lv_label_create(content);
+    lv_label_set_text(lbl, buf);
+    lv_obj_set_style_text_font(lbl, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_t * btn_close = lv_msgbox_add_footer_button(g_dialog_obj, "确定");
+    lv_obj_set_style_text_font(btn_close, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_add_event_cb(btn_close, (lv_event_cb_t)destroy_dialog_safely, LV_EVENT_CLICKED, NULL);
+}
+
+static void menu_action_cb(lv_event_t * e)
+{
+    const char * op = (const char *)lv_event_get_user_data(e);
+    destroy_dialog_safely();
+
+    if (!op) return;
+
+    if (strcmp(op, "properties") == 0) {
+        show_properties_dialog();
+    } else if (strcmp(op, "delete") == 0) {
+        if (g_selected_is_dir) {
+            fs_delete_recursive(g_selected_full_path);
+        } else {
+            safe_fs_remove(g_selected_full_path);
+        }
+        refresh_file_list(g_current_dir);
+    } else if (strcmp(op, "copy") == 0) {
+        strncpy(g_clipboard_path, g_selected_full_path, sizeof(g_clipboard_path) - 1);
+        g_is_cut = false;
+        update_paste_btn_visibility();
+    } else if (strcmp(op, "cut") == 0) {
+        strncpy(g_clipboard_path, g_selected_full_path, sizeof(g_clipboard_path) - 1);
+        g_is_cut = true;
+        update_paste_btn_visibility();
+    }
+}
+
+static void add_menu_button(lv_obj_t * parent, const char * text, const char * op)
+{
+    lv_obj_t * btn = lv_button_create(parent);
+    lv_obj_set_width(btn, lv_pct(100));
+    lv_obj_set_height(btn, LV_SIZE_CONTENT);
+    lv_obj_set_style_pad_all(btn, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_t * label = lv_label_create(btn);
+    lv_label_set_text(label, text);
+    lv_obj_set_style_text_font(label, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_center(label);
+
+    if (op) {
+        lv_obj_add_event_cb(btn, menu_action_cb, LV_EVENT_CLICKED, (void *)op);
+    } else {
+        lv_obj_add_event_cb(btn, (lv_event_cb_t)destroy_dialog_safely, LV_EVENT_CLICKED, NULL);
+    }
+}
+
+static void popup_item_menu(void)
+{
+    destroy_dialog_safely();
+
+    g_dialog_obj = lv_msgbox_create(NULL);
+    lv_obj_set_width(g_dialog_obj, lv_pct(80));
+    lv_obj_set_style_text_font(g_dialog_obj, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    char title[160];
+    snprintf(title, sizeof(title), "选项: %s", g_selected_filename);
+    lv_msgbox_add_title(g_dialog_obj, title);
+
+    lv_obj_t * content = lv_msgbox_get_content(g_dialog_obj);
+    lv_obj_set_flex_flow(content, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(content, 6, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    add_menu_button(content, "属性", "properties");
+    add_menu_button(content, "复制", "copy");
+    add_menu_button(content, "剪切", "cut");
+    add_menu_button(content, "删除", "delete");
+    add_menu_button(content, "取消", NULL);
+}
+
+/* ---------------- 列表项事件（修复长按冒泡触发短按） ---------------- */
+
+static void file_item_event_cb(lv_event_t * e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t * item = lv_event_get_current_target(e);
+
+    const char * name = (const char *)lv_obj_get_user_data(item);
+    if (!name) return;
+
+    if (code == LV_EVENT_LONG_PRESSED) {
+        // 🔹 触发长按：标记忽略紧接着产生的松开点击事件
+        g_ignore_next_click = true;
+
+        make_path(g_selected_full_path, sizeof(g_selected_full_path), g_current_dir, name);
+        strncpy(g_selected_filename, name, sizeof(g_selected_filename) - 1);
+
+        struct stat st;
+        g_selected_is_dir = (stat(g_selected_full_path, &st) == 0 && S_ISDIR(st.st_mode));
+
+        popup_item_menu();
+    } 
+    else if (code == LV_EVENT_CLICKED) {
+        // 🔹 拦截长按后松开手瞬间触发的 CLICKED 事件
+        if (g_ignore_next_click) {
+            g_ignore_next_click = false;
+            return;
+        }
+
+        make_path(g_selected_full_path, sizeof(g_selected_full_path), g_current_dir, name);
+        strncpy(g_selected_filename, name, sizeof(g_selected_filename) - 1);
+
+        struct stat st;
+        g_selected_is_dir = (stat(g_selected_full_path, &st) == 0 && S_ISDIR(st.st_mode));
+
+        if (g_selected_is_dir) {
+            refresh_file_list(g_selected_full_path);
+        } else {
+            popup_item_menu();
+        }
+    }
+}
+
+static void file_item_delete_cb(lv_event_t * e)
+{
+    char * saved_name = (char *)lv_event_get_user_data(e);
+    if (saved_name) {
+        free(saved_name);
+    }
+}
+
+/* ---------------- 顶部导航事件 ---------------- */
+
+static void btn_back_cb(lv_event_t * e)
+{
+    if (strcmp(g_current_dir, MOUNT_POINT) == 0 || strcmp(g_current_dir, "/") == 0) {
+        return;
+    }
+
+    char * ptr = strrchr(g_current_dir, '/');
+    if (ptr) {
+        if (ptr == g_current_dir) {
+            *(ptr + 1) = '\0';
+        } else {
+            *ptr = '\0';
+        }
+        refresh_file_list(g_current_dir);
+    }
+}
+
+static void btn_paste_cb(lv_event_t * e)
+{
+    if (strlen(g_clipboard_path) == 0) return;
+
+    const char * ptr = strrchr(g_clipboard_path, '/');
+    if (!ptr) ptr = strrchr(g_clipboard_path, '\\');
+    const char * fname = ptr ? (ptr + 1) : g_clipboard_path;
+
+    copy_task_param_t * param = malloc(sizeof(copy_task_param_t));
+    strncpy(param->src, g_clipboard_path, sizeof(param->src) - 1);
+    make_path(param->dst, sizeof(param->dst), g_current_dir, fname);
+    param->is_cut = g_is_cut;
+
+    show_progress_dialog(g_is_cut ? "正在移动..." : "正在复制...");
+    xTaskCreate(async_copy_task, "async_copy_task", 8192, param, 5, NULL);
+}
+
+/* ---------------- 刷新列表 ---------------- */
+
+static void refresh_file_list(const char * path)
+{
+    if (!path || strlen(path) == 0) path = MOUNT_POINT;
+    strncpy(g_current_dir, path, sizeof(g_current_dir) - 1);
+
+    if (g_path_label) {
+        lv_label_set_text(g_path_label, g_current_dir);
+    }
+
+    lv_obj_clean(g_file_list_container);
+
+    DIR * dir = opendir(g_current_dir);
+
+    if (!dir) {
+        ESP_LOGE(TAG, "无法打开目录或存储卡未挂载: %s", g_current_dir);
+
+        lv_obj_t * empty_msg = lv_obj_create(g_file_list_container);
+        // 给 label 设置 flex_grow 为 1，让它占据整个容器
+        lv_obj_set_flex_grow(empty_msg, 1);
+        lv_obj_set_size(empty_msg, lv_pct(100), lv_pct(100));
+        // 然后在 label 内部使用 flex 布局来居中文本
+        lv_obj_set_flex_flow(empty_msg, LV_FLEX_FLOW_COLUMN);
+        lv_obj_set_style_flex_main_place(empty_msg, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_flex_cross_place(empty_msg, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_flex_track_place(empty_msg, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_pad_column(empty_msg, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+        lv_obj_t * empty_msg_label = lv_label_create(empty_msg);
+        lv_label_set_text(empty_msg_label, "未检测到存储卡或存储卡未挂载");
+        lv_obj_set_style_text_font(empty_msg_label, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_color(empty_msg_label, lv_palette_main(LV_PALETTE_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+        lv_obj_t * empty_msg_btn = lv_btn_create(empty_msg);
+        lv_obj_t * empty_msg_btn_label = lv_label_create(empty_msg_btn);
+        lv_label_set_text(empty_msg_btn_label, "刷新");
+        lv_obj_set_style_text_font(empty_msg_btn_label, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_add_event_cb(empty_msg_btn, (lv_event_cb_t)btn_refresh_cb, LV_EVENT_CLICKED, NULL);
+        return;
+    }
+
+    struct dirent * entry;
+    int item_count = 0;
+
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+
+        item_count++;
+
+        char full_item_path[512];
+        make_path(full_item_path, sizeof(full_item_path), g_current_dir, entry->d_name);
+
+        struct stat st;
+        bool is_dir = false;
+        size_t fsize = 0;
+        char time_buf[20] = "";
+        char size_buf[16] = "";
+
+        if (stat(full_item_path, &st) == 0) {
+            is_dir = S_ISDIR(st.st_mode);
+            fsize = st.st_size;
+
+            struct tm * tm_info = localtime(&st.st_mtime);
+            if (tm_info) {
+                strftime(time_buf, sizeof(time_buf), "%Y-%m-%d %H:%M", tm_info);
+            }
+
+            if (!is_dir) {
+                format_size(fsize, size_buf, sizeof(size_buf));
+            }
+        }
+
+        // 1. 创建列表项容器按钮
+        lv_obj_t * row_btn = lv_button_create(g_file_list_container);
+        lv_obj_set_width(row_btn, lv_pct(100));
+        lv_obj_set_height(row_btn, 52);
+        lv_obj_set_flex_flow(row_btn, LV_FLEX_FLOW_ROW);
+        lv_obj_set_flex_align(row_btn, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+
+        // 按下触摸效果：背景灰色透明反馈
+        lv_obj_set_style_bg_opa(row_btn, LV_OPA_TRANSP, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_color(row_btn, lv_color_hex(0xE0E0E0), LV_PART_MAIN | LV_STATE_PRESSED);
+        lv_obj_set_style_bg_opa(row_btn, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_PRESSED);
+        
+        lv_obj_set_style_border_width(row_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_shadow_width(row_btn, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_pad_hor(row_btn, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_pad_ver(row_btn, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+        // 绑定资源释放逻辑
+        char * saved_name = strdup(entry->d_name);
+        lv_obj_set_user_data(row_btn, saved_name);
+        lv_obj_add_event_cb(row_btn, file_item_delete_cb, LV_EVENT_DELETE, saved_name);
+
+        // 2. 左侧固定图标
+        const char * icon = get_file_icon(entry->d_name, is_dir);
+        lv_obj_t * icon_lbl = lv_label_create(row_btn);
+        lv_label_set_text(icon_lbl, icon);
+        lv_obj_set_style_text_font(icon_lbl, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_color(icon_lbl, lv_color_black(), LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_pad_right(icon_lbl, 8, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+        // 3. 右侧两行文本容器
+        lv_obj_t * text_cnt = lv_obj_create(row_btn);
+        lv_obj_set_flex_grow(text_cnt, 1);
+        lv_obj_set_height(text_cnt, LV_SIZE_CONTENT);
+        lv_obj_set_flex_flow(text_cnt, LV_FLEX_FLOW_COLUMN);
+        lv_obj_set_style_bg_opa(text_cnt, LV_OPA_TRANSP, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_border_width(text_cnt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_pad_all(text_cnt, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_pad_row(text_cnt, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_add_flag(text_cnt, LV_OBJ_FLAG_EVENT_BUBBLE);
+
+        // 🔹 文本第一行：文件名（支持单行循环滚动）
+        lv_obj_t * name_lbl = lv_label_create(text_cnt);
+        lv_obj_set_width(name_lbl, lv_pct(100));
+        lv_label_set_text(name_lbl, entry->d_name);
+        lv_label_set_long_mode(name_lbl, LV_LABEL_LONG_SCROLL_CIRCULAR);
+        lv_obj_set_style_text_color(name_lbl, lv_color_black(), LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(name_lbl, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_add_flag(name_lbl, LV_OBJ_FLAG_EVENT_BUBBLE);
+
+        // 🔹 文本第二行：文件大小和日期放在同一行（超长循环滚动）
+        char sub_info[128];
+        if (is_dir) {
+            snprintf(sub_info, sizeof(sub_info), "%s", time_buf);
+        } else {
+            snprintf(sub_info, sizeof(sub_info), "%s  |  %s", size_buf, time_buf);
+        }
+
+        lv_obj_t * sub_lbl = lv_label_create(text_cnt);
+        lv_obj_set_width(sub_lbl, lv_pct(100));
+        lv_label_set_text(sub_lbl, sub_info);
+        // 设置单行循环滚动模式
+        lv_label_set_long_mode(sub_lbl, LV_LABEL_LONG_SCROLL_CIRCULAR);
+        lv_obj_set_style_text_color(sub_lbl, lv_palette_main(LV_PALETTE_GREY), LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(sub_lbl, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_add_flag(sub_lbl, LV_OBJ_FLAG_EVENT_BUBBLE);
+
+        // 4. 绑定点击与长按事件
+        lv_obj_add_event_cb(row_btn, file_item_event_cb, LV_EVENT_CLICKED, NULL);
+        lv_obj_add_event_cb(row_btn, file_item_event_cb, LV_EVENT_LONG_PRESSED, NULL);
+    }
+
+    closedir(dir);
+
+    // 文件夹为空居中显示
+    if (item_count == 0) {
+        lv_obj_t * empty_lbl = lv_label_create(g_file_list_container);
+        lv_obj_add_flag(empty_lbl, LV_OBJ_FLAG_FLOATING);
+        lv_label_set_text(empty_lbl, "文件夹为空");
+        lv_obj_set_style_text_color(empty_lbl, lv_color_black(), LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_font(empty_lbl, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_center(empty_lbl);
+    }
+}
+
+static void btn_refresh_cb(lv_event_t * e)
+{
+    refresh_file_list(MOUNT_POINT);
+}
+
+/* ---------------- 初始化与销毁 ---------------- */
 
 void ui_file_manager_screen_init(void)
 {
-    ui_file_manager = lv_obj_create(NULL);
-    lv_obj_remove_flag(ui_file_manager, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    ui_file_manager = ui_base_create(NULL);
+    lv_obj_t * display = ui_comp_get_child(ui_file_manager, UI_COMP_DISPLAY_CONTAINER);
+    lv_obj_set_flex_flow(display, LV_FLEX_FLOW_COLUMN);
 
-    ui_Container54 = lv_obj_create(ui_file_manager);
-    lv_obj_remove_style_all(ui_Container54);
-    lv_obj_set_width(ui_Container54, lv_pct(60));
-    lv_obj_set_height(ui_Container54, LV_SIZE_CONTENT);    /// 50
-    lv_obj_set_align(ui_Container54, LV_ALIGN_CENTER);
-    lv_obj_set_flex_flow(ui_Container54, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(ui_Container54, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_add_flag(ui_Container54, LV_OBJ_FLAG_HIDDEN);     /// Flags
-    lv_obj_remove_flag(ui_Container54, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE |
-                       LV_OBJ_FLAG_SCROLLABLE);     /// Flags
-    lv_obj_set_style_radius(ui_Container54, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_Container54, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_Container54, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_color(ui_Container54, lv_color_hex(0x777777), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_opa(ui_Container54, 128, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_width(ui_Container54, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_spread(ui_Container54, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_offset_x(ui_Container54, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_shadow_offset_y(ui_Container54, 3, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // 1. 顶部控制栏
+    lv_obj_t * top_bar = lv_obj_create(display);
+    lv_obj_set_width(top_bar, lv_pct(100));
+    lv_obj_set_height(top_bar, 40);
+    lv_obj_set_flex_flow(top_bar, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(top_bar, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_all(top_bar, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_file_name = lv_label_create(ui_Container54);
-    lv_obj_set_width(ui_file_name, lv_pct(100));
-    lv_obj_set_height(ui_file_name, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_file_name, LV_ALIGN_CENTER);
-    lv_label_set_long_mode(ui_file_name, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text(ui_file_name, "");
-    lv_obj_set_style_text_align(ui_file_name, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_decor(ui_file_name, LV_TEXT_DECOR_NONE, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_file_name, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_color(ui_file_name, lv_color_hex(0xFF0000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_file_name, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_t * btn_back = lv_button_create(top_bar);
+    lv_obj_set_size(btn_back, 60, 32);
+    lv_obj_t * lbl_back = lv_label_create(btn_back);
+    lv_label_set_text(lbl_back, "返回");
+    lv_obj_set_style_text_font(lbl_back, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_center(lbl_back);
+    lv_obj_add_event_cb(btn_back, btn_back_cb, LV_EVENT_CLICKED, NULL);
 
-    ui_Label40 = lv_label_create(ui_Container54);
-    lv_obj_set_width(ui_Label40, lv_pct(100));
-    lv_obj_set_height(ui_Label40, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_Label40, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label40, "删除");
-    lv_obj_add_flag(ui_Label40, LV_OBJ_FLAG_CLICKABLE);     /// Flags
-    lv_obj_remove_flag(ui_Label40, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE |
-                       LV_OBJ_FLAG_SNAPPABLE);      /// Flags
-    lv_obj_set_style_text_color(ui_Label40, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_Label40, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_Label40, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label40, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui_Label40, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_Label40, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_Label40, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_Label40, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    g_path_label = lv_label_create(top_bar);
+    lv_obj_set_flex_grow(g_path_label, 1);
+    lv_label_set_text(g_path_label, MOUNT_POINT);
+    lv_label_set_long_mode(g_path_label, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_style_text_color(g_path_label, lv_color_black(), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(g_path_label, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Label42 = lv_label_create(ui_Container54);
-    lv_obj_set_width(ui_Label42, lv_pct(100));
-    lv_obj_set_height(ui_Label42, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_Label42, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label42, "关闭");
-    lv_obj_add_flag(ui_Label42, LV_OBJ_FLAG_CLICKABLE);     /// Flags
-    lv_obj_remove_flag(ui_Label42, LV_OBJ_FLAG_PRESS_LOCK | LV_OBJ_FLAG_GESTURE_BUBBLE |
-                       LV_OBJ_FLAG_SNAPPABLE);      /// Flags
-    lv_obj_set_style_text_color(ui_Label42, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(ui_Label42, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_align(ui_Label42, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label42, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(ui_Label42, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(ui_Label42, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(ui_Label42, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(ui_Label42, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
+    // 右上角“粘贴”按钮
+    g_btn_paste = lv_button_create(top_bar);
+    lv_obj_set_size(g_btn_paste, 60, 32);
+    lv_obj_t * lbl_paste = lv_label_create(g_btn_paste);
+    lv_label_set_text(lbl_paste, "粘贴");
+    lv_obj_set_style_text_font(lbl_paste, ui_font_simhei14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_center(lbl_paste);
+    lv_obj_add_event_cb(g_btn_paste, btn_paste_cb, LV_EVENT_CLICKED, NULL);
 
-    lv_obj_add_event_cb(ui_Label40, ui_event_Label40, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_Label42, ui_event_Label42, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_file_manager, ui_event_file_manager, LV_EVENT_ALL, NULL);
+    update_paste_btn_visibility();
 
+    // 2. 文件列表容器
+    g_file_list_container = lv_obj_create(display);
+    lv_obj_set_width(g_file_list_container, lv_pct(100));
+    lv_obj_set_flex_grow(g_file_list_container, 1);
+    lv_obj_set_flex_flow(g_file_list_container, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_all(g_file_list_container, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_row(g_file_list_container, 2, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    refresh_file_list(MOUNT_POINT);
+
+    lv_obj_add_event_cb(ui_file_manager, screen_unload_cb, LV_EVENT_SCREEN_UNLOADED, NULL);
+    // lv_obj_add_event_cb(ui_file_manager, screen_load_cb, LV_EVENT_SCREEN_LOADED, NULL);
+}
+
+static void screen_unload_cb(lv_event_t * e)
+{
+    // 🔹 触发 unload 事件时清空剪贴板
+    g_clipboard_path[0] = '\0';
+    g_is_cut = false;
+
+    update_paste_btn_visibility();
+    destroy_dialog_safely();
 }
 
 void ui_file_manager_screen_destroy(void)
 {
-    if(ui_file_manager) lv_obj_del(ui_file_manager);
+    destroy_dialog_safely();
 
-    // NULL screen variables
-    ui_file_manager = NULL;
-    ui_Container54 = NULL;
-    ui_file_name = NULL;
-    ui_Label40 = NULL;
-    ui_Label42 = NULL;
-
+    if (ui_file_manager) {
+        lv_obj_del(ui_file_manager);
+        ui_file_manager = NULL;
+    }
 }

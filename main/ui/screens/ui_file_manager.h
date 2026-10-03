@@ -13,14 +13,7 @@ extern "C" {
 // SCREEN: ui_file_manager
 extern void ui_file_manager_screen_init(void);
 extern void ui_file_manager_screen_destroy(void);
-extern void ui_event_file_manager(lv_event_t * e);
 extern lv_obj_t * ui_file_manager;
-extern lv_obj_t * ui_Container54;
-extern lv_obj_t * ui_file_name;
-extern void ui_event_Label40(lv_event_t * e);
-extern lv_obj_t * ui_Label40;
-extern void ui_event_Label42(lv_event_t * e);
-extern lv_obj_t * ui_Label42;
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus

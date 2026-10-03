@@ -322,7 +322,7 @@ void init_navigation_bar()
     lv_obj_set_align(ui_navigation_bar, LV_ALIGN_BOTTOM_MID);
     lv_obj_set_style_bg_color(ui_navigation_bar, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_navigation_bar, LV_OPA_0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_add_flag(ui_navigation_bar, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_flag(ui_navigation_bar, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_EVENT_BUBBLE);
     lv_obj_remove_flag(ui_navigation_bar, LV_OBJ_FLAG_GESTURE_BUBBLE);
 
     // 创建白条指示器，使用差值混合模式实现反色效果
@@ -331,7 +331,7 @@ void init_navigation_bar()
     lv_obj_set_size(ui_baitiao, lv_pct(40), 4);
     lv_obj_set_style_blend_mode(ui_baitiao, LV_BLEND_MODE_DIFFERENCE, 0);
     lv_obj_set_style_bg_color(ui_baitiao, lv_color_hex(0xffffff), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_opa(ui_baitiao, LV_OPA_30, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_baitiao, LV_OPA_20, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_radius(ui_baitiao, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_align(ui_baitiao, LV_ALIGN_CENTER);
 

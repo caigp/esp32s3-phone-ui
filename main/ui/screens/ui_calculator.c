@@ -262,6 +262,7 @@ void ui_calculator_screen_init(void) {
     lv_obj_set_align(ui_calc_display_label, LV_ALIGN_BOTTOM_RIGHT);
     lv_label_set_text(ui_calc_display_label, "0");
     lv_obj_set_style_text_align(ui_calc_display_label, LV_TEXT_ALIGN_RIGHT, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_calc_display_label, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // 4. 按键矩阵 Button Matrix
     ui_calc_btnm = lv_buttonmatrix_create(ui_calc_screen);

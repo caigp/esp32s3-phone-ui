@@ -513,18 +513,18 @@ void gaming_exit(lv_event_t * e)
 static void fe_event_cb(lv_event_t * e)
 {
 
-    lv_obj_t * fe = lv_event_get_target(e);   // 文件浏览器对象本身
+    // lv_obj_t * fe = lv_event_get_target(e);   // 文件浏览器对象本身
 
-    const char * cur_path = lv_file_explorer_get_current_path(fe);
-    const char * sel_fn   = lv_file_explorer_get_selected_file_name(fe);
+    // const char * cur_path = lv_file_explorer_get_current_path(fe);
+    // const char * sel_fn   = lv_file_explorer_get_selected_file_name(fe);
 
-    lv_obj_remove_flag(ui_Container54, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_move_foreground(ui_Container54);
+    // lv_obj_remove_flag(ui_Container54, LV_OBJ_FLAG_HIDDEN);
+    // lv_obj_move_foreground(ui_Container54);
 
 
-    lv_label_set_text(ui_file_name, sel_fn);
-    lv_obj_set_user_data(ui_Container54, (void *) strdup(cur_path));
-    lv_obj_set_user_data(ui_Label40, (void *) strdup(sel_fn));
+    // lv_label_set_text(ui_file_name, sel_fn);
+    // lv_obj_set_user_data(ui_Container54, (void *) strdup(cur_path));
+    // lv_obj_set_user_data(ui_Label40, (void *) strdup(sel_fn));
 }
 
 void file_manager_loaded(lv_event_t * e)
@@ -592,37 +592,37 @@ void game_list_refresh(lv_event_t * e)
 
 void file_del(lv_event_t * e)
 {
-    char *cur_path = (char *) lv_obj_get_user_data(ui_Container54);
-    ESP_LOGI(TAG, "cur_path = %s", cur_path);
+    // char *cur_path = (char *) lv_obj_get_user_data(ui_Container54);
+    // ESP_LOGI(TAG, "cur_path = %s", cur_path);
 
-    char *sel_fn = (char *) lv_obj_get_user_data(ui_Label40);
-    ESP_LOGI(TAG, "sel_fn = %s", sel_fn);
+    // char *sel_fn = (char *) lv_obj_get_user_data(ui_Label40);
+    // ESP_LOGI(TAG, "sel_fn = %s", sel_fn);
 
-    char full[256];
-    snprintf(full, sizeof(full), "%s%s%s", SD_MOUNT_PATH, cur_path + 2, sel_fn);
+    // char full[256];
+    // snprintf(full, sizeof(full), "%s%s%s", SD_MOUNT_PATH, cur_path + 2, sel_fn);
 
-    ESP_LOGI(TAG, "full path = %s", full);
+    // ESP_LOGI(TAG, "full path = %s", full);
 
-    if(!remove(full))
-    {
-        show_toast("已删除");
-        lv_file_explorer_open_dir(file_explorer, cur_path);
-    }
-    else
-    {
-        show_toast("删除失败");
-    }
+    // if(!remove(full))
+    // {
+    //     show_toast("已删除");
+    //     lv_file_explorer_open_dir(file_explorer, cur_path);
+    // }
+    // else
+    // {
+    //     show_toast("删除失败");
+    // }
     
 
-    free(cur_path);
-    free(sel_fn);
+    // free(cur_path);
+    // free(sel_fn);
 
-    lv_obj_add_flag(ui_Container54, LV_OBJ_FLAG_HIDDEN);
+    // lv_obj_add_flag(ui_Container54, LV_OBJ_FLAG_HIDDEN);
 }
 
 void file_act_close(lv_event_t * e)
 {
-    lv_obj_add_flag(ui_Container54, LV_OBJ_FLAG_HIDDEN);
+    // lv_obj_add_flag(ui_Container54, LV_OBJ_FLAG_HIDDEN);
 }
 
 static void event_cb(lv_event_t * e)

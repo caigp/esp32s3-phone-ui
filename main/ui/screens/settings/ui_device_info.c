@@ -124,6 +124,7 @@ void ui_device_info_init(void)
     lv_obj_remove_style_all(head_obj);
     lv_obj_set_height(head_obj, lv_pct(25));
     lv_obj_set_width(head_obj, lv_pct(100));
+    lv_obj_remove_flag(head_obj, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_style_bg_color(head_obj, lv_color_hex(0x4682B4), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(head_obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_radius(head_obj, 5, LV_PART_MAIN | LV_STATE_DEFAULT);

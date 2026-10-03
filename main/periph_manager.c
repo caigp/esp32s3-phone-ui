@@ -227,7 +227,7 @@ static void init_sd()
         .sclk_io_num = SD_SCK,
         .quadwp_io_num = -1,
         .quadhd_io_num = -1,
-        .max_transfer_sz = 4096,
+        .max_transfer_sz = 16 * 1024,
     };
 
     ret = spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA);
